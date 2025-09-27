@@ -8,7 +8,30 @@
 
   <!-- Favicons -->
   <link href="../assets/img/favicon.png" rel="icon">
-  <link href="../assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="../      currentUserUid = user.uid;
+      
+      // Register FCM in background (non-blocking)
+      registerMessaging(user).catch(err => {
+        console.warn('FCM registration failed (non-blocking):', err);
+      });
+      
+      const params = new URLSearchParams(location.search);
+      currentSectionId = params.get('sectionId');
+      if (!currentSectionId) {
+        window.location.replace('dashboard.html');
+        return;
+      }
+      
+      // Load section info first, then students
+      try {
+        await loadSection(currentSectionId);
+        await loadStudents(currentSectionId);
+      } catch (err) {
+        console.error('Error during initialization:', err);
+        showAlert(`Initialization error: ${err.message}`, 'danger');
+      } finally {
+        hideLoading();
+      }g/apple-touch-icon.png" rel="apple-touch-icon">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -54,8 +77,20 @@
     <section class="students section">
       <div class="container">
         <div class="section-title">
-          <h2>Student Management</h2>
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">Add New Student</button>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h2>Student Management</h2>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></li>
+                  <li class="breadcrumb-item active" aria-current="page" id="sectionBreadcrumb">Loading Section...</li>
+                </ol>
+              </nav>
+            </div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+              <i class="bi bi-person-plus"></i> Add New Student
+            </button>
+          </div>
         </div>
         <div class="table-responsive">
           <table class="table" id="studentsTable">
@@ -82,7 +117,7 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Add New Student</h5>
+            <h5 class="modal-title" id="addStudentModalTitle">Add New Student</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
@@ -96,8 +131,9 @@
                 <input type="text" class="form-control" id="studentId" required>
               </div>
               <div class="mb-3">
-                <label for="studentGrade" class="form-label">Grade</label>
-                <input type="text" class="form-control" id="studentGrade" required>
+                <div class="form-text text-muted">
+                  <i class="bi bi-info-circle"></i> Grade level will be automatically set based on the section: <strong id="sectionGradeDisplay">Loading...</strong>
+                </div>
               </div>
               <div class="mb-3">
                 <label for="parentPhone" class="form-label">Parent Phone</label>
@@ -142,6 +178,95 @@
 
   let currentSectionId = null;
   let currentUserUid = null;
+  let currentSection = null;
+
+    // Update section UI elements
+    function updateSectionUI() {
+      if (!currentSection) {
+        console.warn('updateSectionUI called but currentSection is null');
+        return;
+      }
+      
+      console.log('Updating UI with section:', currentSection);
+      
+      // Update page title
+      const titleElement = document.querySelector('.section-title h2');
+      if (titleElement) {
+        titleElement.textContent = `${currentSection.name} - Students`;
+        console.log('Updated title element');
+      } else {
+        console.warn('Title element not found');
+      }
+      
+      // Update breadcrumb
+      const breadcrumb = document.getElementById('sectionBreadcrumb');
+      if (breadcrumb) {
+        breadcrumb.textContent = `${currentSection.name} (Grade ${currentSection.grade})`;
+        console.log('Updated breadcrumb:', breadcrumb.textContent);
+      } else {
+        console.warn('Breadcrumb element not found');
+      }
+      
+      // Update grade display in form
+      const gradeDisplay = document.getElementById('sectionGradeDisplay');
+      if (gradeDisplay) {
+        gradeDisplay.textContent = `Grade ${currentSection.grade}`;
+        console.log('Updated grade display:', gradeDisplay.textContent);
+      } else {
+        console.warn('Grade display element not found');
+      }
+      
+      // Update modal title
+      const modalTitle = document.getElementById('addStudentModalTitle');
+      if (modalTitle) {
+        modalTitle.textContent = `Add Student to ${currentSection.name}`;
+        console.log('Updated modal title');
+      } else {
+        console.warn('Modal title element not found');
+      }
+    }
+
+    // Load section information
+    async function loadSection(sectionId) {
+      try {
+        console.log('Loading section:', sectionId);
+        const sectionDoc = await getDoc(doc(db, 'sections', sectionId));
+        
+        if (sectionDoc.exists()) {
+          currentSection = { id: sectionDoc.id, ...sectionDoc.data() };
+          console.log('Section data loaded:', currentSection);
+          
+          // Update UI immediately
+          updateSectionUI();
+          
+          // Try to update UI elements again after a small delay in case DOM wasn't ready
+          setTimeout(() => {
+            updateSectionUI();
+          }, 100);
+          
+          console.log('Section UI updated successfully');
+        } else {
+          console.error('Section document does not exist');
+          showAlert('Section not found', 'danger');
+          setTimeout(() => {
+            window.location.replace('dashboard.html');
+          }, 2000);
+        }
+      } catch (err) {
+        console.error('Error loading section:', err);
+        showAlert(`Error loading section: ${err.message}`, 'danger');
+        
+        // Set fallback text
+        const breadcrumb = document.getElementById('sectionBreadcrumb');
+        if (breadcrumb) {
+          breadcrumb.textContent = 'Section Error';
+        }
+        const gradeDisplay = document.getElementById('sectionGradeDisplay');
+        if (gradeDisplay) {
+          gradeDisplay.textContent = 'Error loading grade';
+        }
+      }
+    }
 
     async function loadStudents(sectionId) {
       showLoading('Loading students…');
@@ -184,9 +309,14 @@
       try {
         const name = document.getElementById('studentName').value.trim();
         const studentId = document.getElementById('studentId').value.trim();
-        const grade = document.getElementById('studentGrade').value.trim();
+        const grade = currentSection ? currentSection.grade : 'Unknown';
         const parentPhone = document.getElementById('parentPhone').value.trim();
         const parentEmail = document.getElementById('parentEmail').value.trim();
+        
+        if (!currentSection) {
+          showAlert('Section information not loaded. Please refresh the page.', 'danger');
+          return;
+        }
 
         // Create/find parent
         const parentQuery = query(
@@ -254,6 +384,12 @@
     };
 
     showLoading('Checking session…');
+    
+    // Ensure DOM is ready before attempting UI updates
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM ready, section loading can proceed');
+    });
+    
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.replace('login.html');
@@ -271,15 +407,31 @@
         window.location.replace('login.html');
         return;
       }
-  currentUserUid = user.uid;
-  await registerMessaging(user);
+      
+      currentUserUid = user.uid;
+      
+      // Register FCM in background (non-blocking)
+      registerMessaging(user).catch(err => {
+        console.warn('FCM registration failed (non-blocking):', err);
+      });
+      
       const params = new URLSearchParams(location.search);
       currentSectionId = params.get('sectionId');
       if (!currentSectionId) {
         window.location.replace('dashboard.html');
         return;
       }
-      await loadStudents(currentSectionId);
+      
+      // Load section info first, then students
+      try {
+        await loadSection(currentSectionId);
+        await loadStudents(currentSectionId);
+      } catch (err) {
+        console.error('Error during initialization:', err);
+        showAlert(`Initialization error: ${err.message}`, 'danger');
+      } finally {
+        hideLoading();
+      }
     });
 
     document.getElementById('logout').addEventListener('click', async (e) => {

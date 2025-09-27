@@ -48,6 +48,13 @@ service cloud.firestore {
       allow update, delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
     }
 
+    // Attendance Sessions (store sectionId, ownerUid, date, status)
+    match /attendanceSessions/{sessionId} {
+      allow read: if isSignedIn() && isTeacher(request.auth.uid) && resource.data.ownerUid == request.auth.uid;
+      allow create: if isSignedIn() && isTeacher(request.auth.uid) && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
     // Tasks (store ownerUid)
     match /tasks/{taskId} {
       allow read: if isSignedIn() && isTeacher(request.auth.uid) && resource.data.ownerUid == request.auth.uid;

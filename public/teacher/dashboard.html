@@ -36,11 +36,11 @@
 
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="dashboard.html" class="active">Dashboard</a></li>
+          <!-- <li><a href="dashboard.html" class="active">Dashboard</a></li>
           <li><a href="students.html">Students</a></li>
           <li><a href="attendance.html">Attendance</a></li>
           <li><a href="tasks.html">Tasks</a></li>
-          <li><a href="messages.html">Messages</a></li>
+          <li><a href="messages.html">Messages</a></li> -->
           <li><a href="#" id="logout">Logout</a></li>
         </ul>
         <!-- Mobile nav toggler (required for responsive menu) -->
@@ -79,7 +79,7 @@
                 <input type="text" class="form-control" id="sectionName" required>
               </div>
               <div class="mb-3">
-                <label for="grade" class="form-label">Grade</label>
+                <label for="grade" class="form-label">Grade Level</label>
                 <input type="text" class="form-control" id="grade" required>
               </div>
               <button type="submit" class="btn btn-primary">Add Section</button>
@@ -99,7 +99,7 @@
   <script type="module">
     import { auth, db } from "./js/firebase.js";
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-    import { collection, query, where, getDocs, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { collection, query, where, getDocs, addDoc, serverTimestamp, doc, getDoc, deleteDoc, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
   import { showLoading, hideLoading, showAlert, consumeFlash, confirmModal } from "./js/ui.js";
     import { registerMessaging } from "./js/fcm.js";
 
@@ -112,25 +112,319 @@
       const querySnapshot = await getDocs(q);
       const container = document.getElementById('sectionsContainer');
       container.innerHTML = '';
+      
+      const activeSections = [];
+      const archivedSections = [];
+      
       querySnapshot.forEach((docSnap) => {
-        const section = docSnap.data();
-        const count = Array.isArray(section.students) ? section.students.length : 0;
-        const card = `
-          <div class="col-md-4 mb-3">
-            <div class="card h-100 shadow-sm">
-              <div class="card-body">
-                <h5 class="card-title">${section.name}</h5>
-                <p class="card-text">Grade: ${section.grade}</p>
-                <p class="card-text">Students: ${count}</p>
-                <a href="students.html?sectionId=${docSnap.id}" class="btn btn-primary btn-sm">Manage Students</a>
-                <a href="attendance.html?sectionId=${docSnap.id}" class="btn btn-secondary btn-sm">Attendance</a>
-                <a href="tasks.html?sectionId=${docSnap.id}" class="btn btn-info btn-sm">Tasks</a>
-                <a href="messages.html?sectionId=${docSnap.id}" class="btn btn-success btn-sm">Messages</a>
-              </div>
-            </div>
-          </div>`;
-        container.insertAdjacentHTML('beforeend', card);
+        const section = { id: docSnap.id, ...docSnap.data() };
+        if (section.archived) {
+          archivedSections.push(section);
+        } else {
+          activeSections.push(section);
+        }
       });
+      
+      // Display active sections
+      if (activeSections.length > 0) {
+        container.insertAdjacentHTML('beforeend', '<div class="col-12"><h4 class="text-primary mb-3"><i class="bi bi-folder"></i> Active Sections</h4></div>');
+        activeSections.forEach((section) => {
+          const count = Array.isArray(section.students) ? section.students.length : 0;
+          const card = `
+            <div class="col-md-4 mb-3">
+              <div class="card h-100 shadow-sm border-primary">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0">${section.name}</h5>
+                    <div class="btn-group">
+                      <button class="btn btn-outline-warning btn-sm" data-action="archive" data-section-id="${section.id}" data-section-name="${section.name}" title="Archive Section">
+                        <i class="bi bi-archive"></i>
+                      </button>
+                      <button class="btn btn-outline-danger btn-sm" data-action="delete" data-section-id="${section.id}" data-section-name="${section.name}" title="Delete Permanently">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="card-text">Grade: ${section.grade}</p>
+                  <p class="card-text">Students: ${count}</p>
+                  <div class="d-grid gap-2">
+                    <div class="btn-group" role="group">
+                      <a href="students.html?sectionId=${section.id}" class="btn btn-primary btn-sm">Students</a>
+                      <a href="attendance.html?sectionId=${section.id}" class="btn btn-secondary btn-sm">Attendance</a>
+                    </div>
+                    <div class="btn-group" role="group">
+                      <a href="tasks.html?sectionId=${section.id}" class="btn btn-info btn-sm">Tasks</a>
+                      <a href="messages.html?sectionId=${section.id}" class="btn btn-success btn-sm">Messages</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+          container.insertAdjacentHTML('beforeend', card);
+        });
+      }
+      
+      // Display archived sections
+      if (archivedSections.length > 0) {
+        container.insertAdjacentHTML('beforeend', '<div class="col-12 mt-4"><h4 class="text-muted mb-3"><i class="bi bi-archive"></i> Archived Sections</h4></div>');
+        archivedSections.forEach((section) => {
+          const count = Array.isArray(section.students) ? section.students.length : 0;
+          const card = `
+            <div class="col-md-4 mb-3">
+              <div class="card h-100 shadow-sm border-secondary" style="opacity: 0.7;">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0">${section.name} <span class="badge bg-secondary">Archived</span></h5>
+                    <div class="btn-group">
+                      <button class="btn btn-outline-success btn-sm" data-action="restore" data-section-id="${section.id}" data-section-name="${section.name}" title="Restore Section">
+                        <i class="bi bi-arrow-clockwise"></i>
+                      </button>
+                      <button class="btn btn-outline-danger btn-sm" data-action="delete" data-section-id="${section.id}" data-section-name="${section.name}" title="Delete Permanently">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="card-text">Grade: ${section.grade}</p>
+                  <p class="card-text">Students: ${count}</p>
+                  <p class="text-muted small">Archived on: ${section.archivedAt ? new Date(section.archivedAt.seconds * 1000).toLocaleDateString() : 'Unknown'}</p>
+                </div>
+              </div>
+            </div>`;
+          container.insertAdjacentHTML('beforeend', card);
+        });
+      }
+      
+      if (activeSections.length === 0 && archivedSections.length === 0) {
+        container.innerHTML = '<div class="col-12 text-center py-5"><i class="bi bi-folder-x display-1 text-muted"></i><p class="text-muted mt-3">No sections found. Create your first section to get started!</p></div>';
+      }
+    }
+
+
+
+    // Add event delegation for dropdown clicks
+    document.addEventListener('click', async (e) => {
+      console.log('Click detected on:', e.target);
+      
+      if (e.target.closest('[data-action]')) {
+        e.preventDefault();
+        console.log('Action element found');
+        
+        const element = e.target.closest('[data-action]');
+        const action = element.getAttribute('data-action');
+        const sectionId = element.getAttribute('data-section-id');
+        const sectionName = element.getAttribute('data-section-name');
+        
+        console.log('Action:', action, 'Section:', sectionId, sectionName);
+        
+        try {
+          switch (action) {
+            case 'archive':
+              console.log('Calling archiveSection');
+              await archiveSection(sectionId, sectionName);
+              break;
+            case 'restore':
+              console.log('Calling restoreSection');
+              await restoreSection(sectionId, sectionName);
+              break;
+            case 'delete':
+              console.log('Calling deleteSection');
+              await deleteSection(sectionId, sectionName);
+              break;
+            default:
+              console.log('Unknown action:', action);
+          }
+        } catch (error) {
+          console.error('Error in action handler:', error);
+          showAlert(`Error: ${error.message}`, 'danger');
+        }
+      }
+    });
+
+    // Archive section function
+    async function archiveSection(sectionId, sectionName) {
+      try {
+        const confirmed = await confirmModal(
+          'Archive Section', 
+          `Are you sure you want to archive "${sectionName}"? This will hide the section but keep all data intact. You can restore it later.`,
+          { confirmText: 'Archive', cancelText: 'Cancel', variant: 'warning' }
+        );
+        
+        if (!confirmed) return;
+        
+        showLoading('Archiving section...');
+        
+        await updateDoc(doc(db, 'sections', sectionId), {
+          archived: true,
+          archivedAt: serverTimestamp()
+        });
+        
+        await loadSections(auth.currentUser.uid);
+        showAlert(`Section "${sectionName}" has been archived successfully.`, 'success');
+      } catch (err) {
+        console.error('Error archiving section:', err);
+        showAlert(`Error archiving section: ${err.message}`, 'danger');
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    // Restore section function
+    async function restoreSection(sectionId, sectionName) {
+      try {
+        const confirmed = await confirmModal(
+          'Restore Section', 
+          `Are you sure you want to restore "${sectionName}"? This will make the section active again.`,
+          { confirmText: 'Restore', cancelText: 'Cancel', variant: 'success' }
+        );
+        
+        if (!confirmed) return;
+        
+        showLoading('Restoring section...');
+        
+        await updateDoc(doc(db, 'sections', sectionId), {
+          archived: false,
+          archivedAt: null,
+          restoredAt: serverTimestamp()
+        });
+        
+        await loadSections(auth.currentUser.uid);
+        showAlert(`Section "${sectionName}" has been restored successfully.`, 'success');
+      } catch (err) {
+        console.error('Error restoring section:', err);
+        showAlert(`Error restoring section: ${err.message}`, 'danger');
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    // Delete section and all related data
+    async function deleteSection(sectionId, sectionName) {
+      try {
+        console.log('Delete function called for:', sectionId, sectionName);
+        
+        const confirmed = confirm(`Are you sure you want to permanently delete "${sectionName}" and ALL its data?\n\nThis will delete:\n• All students\n• All attendance records\n• All tasks\n• All messages\n\nThis action CANNOT be undone!`);
+        
+        if (!confirmed) {
+          console.log('User cancelled deletion');
+          return;
+        }
+        
+        // Double confirmation using native confirm for now
+        const doubleConfirmed = confirm(`FINAL WARNING!\n\nYou are about to permanently delete "${sectionName}" and ALL its data.\n\nType OK to confirm this permanent deletion.`);
+        
+        if (!doubleConfirmed) {
+          console.log('User cancelled double confirmation');
+          return;
+        }
+        
+        showLoading('Deleting section and all related data...');
+        console.log('Starting deletion process for section:', sectionId);
+        
+        const userId = auth.currentUser.uid;
+        let deletedCounts = { students: 0, attendance: 0, sessions: 0, tasks: 0, messages: 0, parents: 0 };
+        
+        try {
+          // Delete students first
+          console.log('Deleting students...');
+          const studentsQuery = query(
+            collection(db, 'students'),
+            where('sectionId', '==', sectionId),
+            where('ownerUid', '==', userId)
+          );
+          const studentsSnapshot = await getDocs(studentsQuery);
+          console.log('Found', studentsSnapshot.size, 'students to delete');
+          
+          for (const studentDoc of studentsSnapshot.docs) {
+            await deleteDoc(studentDoc.ref);
+            deletedCounts.students++;
+          }
+          
+          // Delete attendance records
+          console.log('Deleting attendance records...');
+          const attendanceQuery = query(
+            collection(db, 'attendance'),
+            where('sectionId', '==', sectionId),
+            where('ownerUid', '==', userId)
+          );
+          const attendanceSnapshot = await getDocs(attendanceQuery);
+          console.log('Found', attendanceSnapshot.size, 'attendance records to delete');
+          
+          for (const attendanceDoc of attendanceSnapshot.docs) {
+            await deleteDoc(attendanceDoc.ref);
+            deletedCounts.attendance++;
+          }
+          
+          // Delete attendance sessions
+          console.log('Deleting attendance sessions...');
+          const sessionsQuery = query(
+            collection(db, 'attendanceSessions'),
+            where('sectionId', '==', sectionId),
+            where('ownerUid', '==', userId)
+          );
+          const sessionsSnapshot = await getDocs(sessionsQuery);
+          console.log('Found', sessionsSnapshot.size, 'attendance sessions to delete');
+          
+          for (const sessionDoc of sessionsSnapshot.docs) {
+            await deleteDoc(sessionDoc.ref);
+            deletedCounts.sessions++;
+          }
+          
+          // Delete tasks
+          console.log('Deleting tasks...');
+          const tasksQuery = query(
+            collection(db, 'tasks'),
+            where('sectionId', '==', sectionId),
+            where('ownerUid', '==', userId)
+          );
+          const tasksSnapshot = await getDocs(tasksQuery);
+          console.log('Found', tasksSnapshot.size, 'tasks to delete');
+          
+          for (const taskDoc of tasksSnapshot.docs) {
+            await deleteDoc(taskDoc.ref);
+            deletedCounts.tasks++;
+          }
+          
+          // Delete messages
+          console.log('Deleting messages...');
+          const messagesQuery = query(
+            collection(db, 'messages'),
+            where('sectionId', '==', sectionId),
+            where('ownerUid', '==', userId)
+          );
+          const messagesSnapshot = await getDocs(messagesQuery);
+          console.log('Found', messagesSnapshot.size, 'messages to delete');
+          
+          for (const messageDoc of messagesSnapshot.docs) {
+            await deleteDoc(messageDoc.ref);
+            deletedCounts.messages++;
+          }
+          
+          // Finally, delete the section itself
+          console.log('Deleting section...');
+          await deleteDoc(doc(db, 'sections', sectionId));
+          
+          console.log('All deletions completed successfully');
+          await loadSections(userId);
+          
+          showAlert(
+            `Section "${sectionName}" and all related data has been permanently deleted:\\n\\n` +
+            `• ${deletedCounts.students} students\\n` +
+            `• ${deletedCounts.attendance} attendance records\\n` +
+            `• ${deletedCounts.sessions} attendance sessions\\n` +
+            `• ${deletedCounts.tasks} tasks\\n` +
+            `• ${deletedCounts.messages} messages`,
+            'success'
+          );
+        } catch (deleteError) {
+          console.error('Error during deletion process:', deleteError);
+          throw deleteError;
+        }
+      } catch (err) {
+        console.error('Error deleting section:', err);
+        showAlert(`Error deleting section: ${err.message}`, 'danger');
+      } finally {
+        hideLoading();
+      }
     }
 
     document.getElementById('addSectionForm').addEventListener('submit', async (e) => {
@@ -176,7 +470,9 @@
           return;
         }
         // Register FCM for push notifications (non-blocking)
-        await registerMessaging(user);
+        registerMessaging(user).catch(err => {
+          console.warn('FCM registration failed (non-blocking):', err);
+        });
         hideLoading();
         await loadSections(user.uid);
       } catch (err) {

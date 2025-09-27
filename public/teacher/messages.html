@@ -228,7 +228,10 @@
         return;
       }
   currentUserUid = user.uid;
-  await registerMessaging(user);
+  // Register FCM in background (non-blocking)
+  registerMessaging(user).catch(err => {
+    console.warn('FCM registration failed (non-blocking):', err);
+  });
       const urlParams = new URLSearchParams(window.location.search);
       currentSectionId = urlParams.get('sectionId');
       if (!currentSectionId) {
