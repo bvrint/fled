@@ -565,6 +565,35 @@
     let saveTimeout = null; // Debounce auto-save
     let currentSection = null; // Store section data
     
+    // Get today's date string in YYYY-MM-DD format (local timezone)
+    function getTodayString() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+    
+    // Get date string from timestamp or date object
+    function getDateString(dateInput) {
+      let date;
+      if (dateInput && dateInput.seconds) {
+        // Firestore timestamp
+        date = new Date(dateInput.seconds * 1000);
+      } else if (dateInput instanceof Date) {
+        date = dateInput;
+      } else if (typeof dateInput === 'string') {
+        return dateInput; // Already a string
+      } else {
+        date = new Date();
+      }
+      
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+    
     // Go back to previous page
     function goBack() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -686,20 +715,37 @@
     // Check if there's already a session today
     async function checkTodaySession() {
       try {
-        const today = new Date().toISOString().split('T')[0];
+        const todayStr = getTodayString();
+        console.log('Checking for sessions on date:', todayStr);
+        
+        // Query all sessions for this section and user
         const q = query(
           collection(db, 'attendanceSessions'),
           where('sectionId', '==', currentSectionId),
-          where('ownerUid', '==', currentUserUid),
-          where('date', '==', today)
+          where('ownerUid', '==', currentUserUid)
         );
         const querySnapshot = await getDocs(q);
         
-        if (!querySnapshot.empty) {
-          const sessionDoc = querySnapshot.docs[0];
-          currentSession = { id: sessionDoc.id, ...sessionDoc.data() };
+        // Check each session to find today's session
+        let todaySession = null;
+        querySnapshot.forEach((doc) => {
+          const sessionData = doc.data();
+          const sessionDateStr = getDateString(sessionData.date || sessionData.startTime);
+          
+          console.log(`Session ${doc.id}: stored date = '${sessionData.date}', calculated date = '${sessionDateStr}', today = '${todayStr}'`);
+          
+          if (sessionDateStr === todayStr) {
+            todaySession = { id: doc.id, ...sessionData };
+            console.log('Found today\'s session:', doc.id);
+          }
+        });
+        
+        if (todaySession) {
+          currentSession = todaySession;
           return currentSession;
         }
+        
+        console.log('No session found for today');
         return null;
       } catch (err) {
         console.error('Error checking today session:', err);
@@ -743,6 +789,13 @@
       const statusText = document.getElementById('sessionStatus');
       const statusDate = document.getElementById('sessionDate');
       
+      console.log('Updating UI. Current session:', currentSession ? {
+        id: currentSession.id,
+        status: currentSession.status,
+        date: currentSession.date,
+        startTime: currentSession.startTime
+      } : 'null');
+      
       // First check if students are available
       updateStudentAvailabilityUI();
       
@@ -772,10 +825,12 @@
         loadCurrentSession();
       } else if (currentSession.status === 'finalized') {
         // Finalized session - check if it's from today
-        const sessionDate = currentSession.date;
-        const today = new Date().toISOString().split('T')[0];
+        const sessionDateStr = getDateString(currentSession.date || currentSession.startTime);
+        const todayStr = getTodayString();
         
-        if (sessionDate === today) {
+        console.log(`Comparing session date '${sessionDateStr}' with today '${todayStr}'`);
+        
+        if (sessionDateStr === todayStr) {
           // Today's session is complete
           statusBanner.className = 'alert alert-success text-center';
           statusText.textContent = 'Finalized';
@@ -878,13 +933,16 @@
       try {
         showLoading('Starting attendance session...');
         
-        const today = new Date().toISOString().split('T')[0];
+        const todayStr = getTodayString();
+        console.log('Creating new session for date:', todayStr);
+        
         const sessionDoc = await addDoc(collection(db, 'attendanceSessions'), {
           sectionId: currentSectionId,
           ownerUid: currentUserUid,
-          date: today,
+          date: todayStr, // Store as string for consistent querying
           status: 'ongoing',
           startTime: serverTimestamp(),
+          createdAt: serverTimestamp(),
           studentAttendance: {}
         });
 
@@ -898,9 +956,10 @@
           id: sessionDoc.id,
           sectionId: currentSectionId,
           ownerUid: currentUserUid,
-          date: today,
+          date: todayStr,
           status: 'ongoing',
           startTime: { seconds: Date.now() / 1000 },
+          createdAt: { seconds: Date.now() / 1000 },
           studentAttendance: {}
         };
 
