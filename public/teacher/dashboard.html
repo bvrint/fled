@@ -538,12 +538,12 @@
                         </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
-                          <button class="dropdown-item text-warning" data-action="archive" data-section-id="${section.id}" data-section-name="${section.name}">
+                          <button type="button" class="dropdown-item text-warning" data-action="archive" data-section-id="${section.id}" data-section-name="${section.name}">
                             <i class="bi bi-archive me-2"></i>Archive Section
                           </button>
                         </li>
                         <li>
-                          <button class="dropdown-item text-danger" data-action="delete" data-section-id="${section.id}" data-section-name="${section.name}">
+                          <button type="button" class="dropdown-item text-danger" data-action="delete" data-section-id="${section.id}" data-section-name="${section.name}">
                             <i class="bi bi-trash me-2"></i>Delete Forever
                           </button>
                         </li>
@@ -613,13 +613,13 @@
                       </button>
                       <ul class="dropdown-menu dropdown-menu-end">
                         <li>
-                          <button class="dropdown-item text-success" data-action="restore" data-section-id="${section.id}" data-section-name="${section.name}">
+                          <button type="button" class="dropdown-item text-success" data-action="restore" data-section-id="${section.id}" data-section-name="${section.name}">
                             <i class="bi bi-arrow-clockwise me-2"></i>Restore Section
                           </button>
                         </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
-                          <button class="dropdown-item text-danger" data-action="delete" data-section-id="${section.id}" data-section-name="${section.name}">
+                          <button type="button" class="dropdown-item text-danger" data-action="delete" data-section-id="${section.id}" data-section-name="${section.name}">
                             <i class="bi bi-trash me-2"></i>Delete Forever
                           </button>
                         </li>
@@ -662,7 +662,7 @@
                   </div>
                   
                   <div class="section-actions">
-                    <button class="btn-enter" data-action="restore" data-section-id="${section.id}" data-section-name="${section.name}" style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);">
+                    <button type="button" class="btn-enter" data-action="restore" data-section-id="${section.id}" data-section-name="${section.name}" style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);">
                       <i class="bi bi-arrow-clockwise me-2"></i>Restore Section
                     </button>
                   </div>
@@ -690,37 +690,41 @@
 
 
 
-    // Add event delegation for dropdown clicks
-    document.addEventListener('click', async (e) => {
-      console.log('Click detected on:', e.target);
+    // Add event delegation for dropdown clicks - using document body with more specific targeting
+    document.body.addEventListener('click', async (e) => {
+      // Check if the clicked element or its parent has a data-action attribute
+      const actionElement = e.target.hasAttribute('data-action') 
+        ? e.target 
+        : e.target.closest('[data-action]');
       
-      if (e.target.closest('[data-action]')) {
+      if (actionElement) {
         e.preventDefault();
-        console.log('Action element found');
+        e.stopPropagation();
         
-        const element = e.target.closest('[data-action]');
-        const action = element.getAttribute('data-action');
-        const sectionId = element.getAttribute('data-section-id');
-        const sectionName = element.getAttribute('data-section-name');
+        const action = actionElement.getAttribute('data-action');
+        const sectionId = actionElement.getAttribute('data-section-id');
+        const sectionName = actionElement.getAttribute('data-section-name');
         
-        console.log('Action:', action, 'Section:', sectionId, sectionName);
+        console.log('Action triggered:', { action, sectionId, sectionName });
+        
+        if (!action || !sectionId || !sectionName) {
+          console.error('Missing required attributes:', { action, sectionId, sectionName });
+          return;
+        }
         
         try {
           switch (action) {
             case 'archive':
-              console.log('Calling archiveSection');
               await archiveSection(sectionId, sectionName);
               break;
             case 'restore':
-              console.log('Calling restoreSection');
               await restoreSection(sectionId, sectionName);
               break;
             case 'delete':
-              console.log('Calling deleteSection');
               await deleteSection(sectionId, sectionName);
               break;
             default:
-              console.log('Unknown action:', action);
+              console.warn('Unknown action:', action);
           }
         } catch (error) {
           console.error('Error in action handler:', error);
@@ -791,15 +795,23 @@
       try {
         console.log('Delete function called for:', sectionId, sectionName);
         
-        const confirmed = confirm(`Are you sure you want to permanently delete "${sectionName}" and ALL its data?\n\nThis will delete:\n• All students\n• All attendance records\n• All tasks\n• All messages\n\nThis action CANNOT be undone!`);
+        const confirmed = await confirmModal(
+          'Delete Section Forever', 
+          `Are you sure you want to permanently delete "${sectionName}" and ALL its data?\n\nThis will delete:\n• All students\n• All attendance records\n• All tasks\n• All messages\n\nThis action CANNOT be undone!`,
+          { confirmText: 'Delete Forever', cancelText: 'Cancel', variant: 'danger' }
+        );
         
         if (!confirmed) {
           console.log('User cancelled deletion');
           return;
         }
         
-        // Double confirmation using native confirm for now
-        const doubleConfirmed = confirm(`FINAL WARNING!\n\nYou are about to permanently delete "${sectionName}" and ALL its data.\n\nType OK to confirm this permanent deletion.`);
+        // Double confirmation for permanent deletion
+        const doubleConfirmed = await confirmModal(
+          'FINAL WARNING!', 
+          `You are about to permanently delete "${sectionName}" and ALL its data.\n\nThis is your final chance to cancel. Are you absolutely sure?`,
+          { confirmText: 'Yes, Delete Everything', cancelText: 'Cancel', variant: 'danger' }
+        );
         
         if (!doubleConfirmed) {
           console.log('User cancelled double confirmation');
