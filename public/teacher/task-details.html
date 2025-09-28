@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>FLED - Task Details</title>
+
+  <!-- Favicons -->
+  <link href="../assets/img/favicon.png" rel="icon">
+  <link href="../assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="../assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="../assets/vendor/aos/aos.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="../assets/css/main.css" rel="stylesheet">
+
+  <style>
+    .task-header {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+      color: white;
+      padding: 2rem 0;
+      margin-bottom: 2rem;
+    }
+    
+    .rubric-item {
+      background: #f8f9fa;
+      border-left: 4px solid #17a2b8;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      border-radius: 0.25rem;
+    }
+    
+    .score-input {
+      width: 80px;
+    }
+    
+    .score-input.is-invalid {
+      border-color: #dc3545;
+    }
+    
+    .score-input.is-valid {
+      border-color: #28a745;
+    }
+    
+    .perfect-score-badge {
+      background: linear-gradient(45deg, #28a745, #20c997);
+      color: white;
+    }
+    
+    .deadline-badge {
+      background: linear-gradient(45deg, #ffc107, #e0a800);
+      color: #212529;
+    }
+    
+    .task-info-card {
+      border: none;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .student-score-row:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .validation-message {
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header id="header" class="header d-flex align-items-center sticky-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+      <a href="" class="logo d-flex align-items-center">
+        <h1 class="sitename"><span></span>FLED</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="#" id="logout">Logout</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list" aria-label="Toggle navigation"></i>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- Task Header -->
+    <section class="task-header">
+      <div class="container">
+        <nav aria-label="breadcrumb" class="mb-3">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="dashboard.html" class="text-white-50">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="#" id="section-link" class="text-white-50">Section</a></li>
+            <li class="breadcrumb-item"><a href="#" id="tasks-link" class="text-white-50">Tasks</a></li>
+            <li class="breadcrumb-item active text-white" aria-current="page" id="task-breadcrumb">Task Details</li>
+          </ol>
+        </nav>
+        
+        <div class="row align-items-center">
+          <div class="col-lg-8">
+            <h1 class="mb-2" id="task-title">Loading Task...</h1>
+            <p class="mb-0 opacity-75" id="task-description">Please wait while we load the task information</p>
+          </div>
+          <div class="col-lg-4 text-end">
+            <div class="d-flex gap-2 justify-content-end flex-wrap">
+              <span class="badge perfect-score-badge fs-6" id="perfect-score-badge">
+                <i class="bi bi-trophy"></i> Perfect Score: <span id="perfect-score">0</span>
+              </span>
+              <span class="badge deadline-badge fs-6" id="deadline-badge">
+                <i class="bi bi-calendar-event"></i> Due: <span id="task-deadline">N/A</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Task Information -->
+    <section class="section">
+      <div class="container">
+        <div class="row">
+          <!-- Task Details Card -->
+          <div class="col-lg-4 mb-4">
+            <div class="card task-info-card h-100">
+              <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                  <i class="bi bi-info-circle me-2"></i>Task Information
+                </h5>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <label class="fw-bold text-muted">Category:</label>
+                  <p class="mb-1" id="task-category">-</p>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="fw-bold text-muted">Rubrics:</label>
+                  <div id="rubrics-container">
+                    <!-- Rubrics will be loaded here -->
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="fw-bold text-muted">Total Students:</label>
+                  <p class="mb-0" id="total-students">0</p>
+                </div>
+                
+                <div class="mb-3">
+                  <label class="fw-bold text-muted">Scores Submitted:</label>
+                  <p class="mb-0">
+                    <span id="scores-submitted">0</span> / <span id="total-students-count">0</span>
+                    <span class="badge bg-primary ms-2" id="completion-percentage">0%</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Student Scores -->
+          <div class="col-lg-8">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                  <i class="bi bi-people me-2"></i>Student Scores
+                </h5>
+                <div class="btn-group">
+                  <button class="btn btn-outline-secondary btn-sm" id="clear-all-scores">
+                    <i class="bi bi-arrow-clockwise"></i> Clear All
+                  </button>
+                  <button class="btn btn-success" id="save-scores-btn">
+                    <i class="bi bi-save"></i> Save Scores
+                  </button>
+                </div>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th style="width: 50%">Student Name</th>
+                        <th style="width: 20%" class="text-center">Score</th>
+                        <th style="width: 20%" class="text-center">Percentage</th>
+                        <th style="width: 10%" class="text-center">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="students-table-body">
+                      <!-- Students will be loaded here -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="mt-4 d-flex gap-2">
+              <a href="#" id="back-to-tasks" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Tasks
+              </a>
+              <button class="btn btn-primary" id="save-and-continue">
+                <i class="bi bi-check-circle"></i> Save & Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Vendor JS Files -->
+  <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <script type="module">
+    import { auth, db } from "./js/firebase.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { collection, query, where, getDocs, addDoc, doc, getDoc, serverTimestamp, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { showLoading, hideLoading, showAlert, confirmModal } from "./js/ui.js";
+    import { registerMessaging } from "./js/fcm.js";
+
+    let currentSectionId = null;
+    let currentTaskId = null;
+    let currentUserUid = null;
+    let taskData = null;
+    let studentsData = [];
+    let currentScores = {};
+
+    // Get URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    currentSectionId = urlParams.get('sectionId');
+    currentTaskId = urlParams.get('taskId');
+
+    if (!currentSectionId || !currentTaskId) {
+      showAlert('Missing required parameters. Redirecting to dashboard.', 'warning');
+      setTimeout(() => window.location.replace('dashboard.html'), 2000);
+    }
+
+    // Load task details
+    async function loadTaskDetails() {
+      try {
+        const taskDoc = await getDoc(doc(db, 'tasks', currentTaskId));
+        if (!taskDoc.exists()) {
+          throw new Error('Task not found');
+        }
+
+        taskData = { id: taskDoc.id, ...taskDoc.data() };
+        
+        // Update UI with task information
+        document.getElementById('task-title').textContent = taskData.title;
+        document.getElementById('task-description').textContent = taskData.description || 'No description provided';
+        document.getElementById('task-category').textContent = taskData.type || taskData.category || 'General';
+        document.getElementById('perfect-score').textContent = taskData.perfectScore || 100;
+        
+        // Format deadline
+        if (taskData.deadline) {
+          const deadline = taskData.deadline.toDate ? taskData.deadline.toDate() : new Date(taskData.deadline);
+          document.getElementById('task-deadline').textContent = deadline.toLocaleDateString();
+        }
+        
+        // Load rubrics
+        loadRubrics(taskData.rubrics || []);
+        
+        // Update breadcrumb
+        document.getElementById('task-breadcrumb').textContent = taskData.title;
+        
+      } catch (error) {
+        console.error('Error loading task:', error);
+        showAlert('Error loading task details: ' + error.message, 'danger');
+      }
+    }
+
+    // Load rubrics
+    function loadRubrics(rubrics) {
+      const container = document.getElementById('rubrics-container');
+      if (!rubrics || rubrics.length === 0) {
+        container.innerHTML = '<p class="text-muted mb-0">No rubrics defined</p>';
+        return;
+      }
+
+      const rubricsHtml = rubrics.map(rubric => `
+        <div class="rubric-item">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="fw-medium">${rubric.criteria}</span>
+            <span class="badge bg-info">${rubric.points} pts</span>
+          </div>
+        </div>
+      `).join('');
+      
+      container.innerHTML = rubricsHtml;
+    }
+
+    // Load students for the section
+    async function loadStudents() {
+      try {
+        const studentsQuery = query(
+          collection(db, 'students'),
+          where('sectionId', '==', currentSectionId),
+          where('ownerUid', '==', currentUserUid)
+        );
+        const studentsSnapshot = await getDocs(studentsQuery);
+        
+        studentsData = studentsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        // Update student count
+        document.getElementById('total-students').textContent = studentsData.length;
+        document.getElementById('total-students-count').textContent = studentsData.length;
+        
+        // Load existing scores if any
+        await loadExistingScores();
+        
+        // Render students table
+        renderStudentsTable();
+        
+      } catch (error) {
+        console.error('Error loading students:', error);
+        showAlert('Error loading students: ' + error.message, 'danger');
+      }
+    }
+
+    // Load existing scores
+    async function loadExistingScores() {
+      try {
+        const taskScoreDoc = await getDoc(doc(db, 'taskScores', currentTaskId));
+        if (taskScoreDoc.exists()) {
+          const scoreData = taskScoreDoc.data();
+          currentScores = scoreData.scores || {};
+        }
+      } catch (error) {
+        console.error('Error loading existing scores:', error);
+        currentScores = {};
+      }
+    }
+
+    // Render students table
+    function renderStudentsTable() {
+      const tbody = document.getElementById('students-table-body');
+      const perfectScore = taskData?.perfectScore || 100;
+      
+      const studentsHtml = studentsData.map(student => {
+        const currentScore = currentScores[student.id] || '';
+        const percentage = currentScore ? Math.round((currentScore / perfectScore) * 100) : 0;
+        const hasScore = currentScore !== '';
+        
+        return `
+          <tr class="student-score-row">
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="me-2">
+                  <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                    ${student.name.charAt(0).toUpperCase()}
+                  </div>
+                </div>
+                <div>
+                  <strong>${student.name}</strong>
+                  <br><small class="text-muted">ID: ${student.studentId}</small>
+                </div>
+              </div>
+            </td>
+            <td class="text-center">
+              <input 
+                type="number" 
+                class="form-control score-input ${hasScore ? 'is-valid' : ''}" 
+                id="score-${student.id}"
+                value="${currentScore}"
+                min="0" 
+                max="${perfectScore}" 
+                step="0.5"
+                placeholder="0"
+                data-student-id="${student.id}"
+                data-perfect-score="${perfectScore}"
+              >
+              <div class="validation-message text-danger" id="error-${student.id}"></div>
+            </td>
+            <td class="text-center">
+              <span class="badge ${percentage >= 75 ? 'bg-success' : percentage >= 50 ? 'bg-warning' : 'bg-danger'}" id="percentage-${student.id}">
+                ${hasScore ? percentage + '%' : '0%'}
+              </span>
+            </td>
+            <td class="text-center">
+              <i class="bi ${hasScore ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted'}" id="status-${student.id}"></i>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      
+      tbody.innerHTML = studentsHtml;
+      
+      // Add event listeners to score inputs
+      studentsData.forEach(student => {
+        const input = document.getElementById(`score-${student.id}`);
+        input.addEventListener('input', () => validateAndUpdateScore(student.id));
+        input.addEventListener('blur', () => validateAndUpdateScore(student.id));
+      });
+      
+      updateScoresSummary();
+    }
+
+    // Validate and update score
+    function validateAndUpdateScore(studentId) {
+      const input = document.getElementById(`score-${studentId}`);
+      const errorDiv = document.getElementById(`error-${studentId}`);
+      const percentageSpan = document.getElementById(`percentage-${studentId}`);
+      const statusIcon = document.getElementById(`status-${studentId}`);
+      const perfectScore = taskData?.perfectScore || 100;
+      
+      const score = parseFloat(input.value);
+      
+      // Clear previous validation
+      input.classList.remove('is-valid', 'is-invalid');
+      errorDiv.textContent = '';
+      
+      if (input.value === '') {
+        // Empty score
+        delete currentScores[studentId];
+        percentageSpan.textContent = '0%';
+        percentageSpan.className = 'badge bg-danger';
+        statusIcon.className = 'bi bi-circle text-muted';
+        updateScoresSummary();
+        return;
+      }
+      
+      if (isNaN(score) || score < 0) {
+        input.classList.add('is-invalid');
+        errorDiv.textContent = 'Please enter a valid score';
+        return;
+      }
+      
+      if (score > perfectScore) {
+        input.classList.add('is-invalid');
+        errorDiv.textContent = `Score cannot exceed ${perfectScore}`;
+        return;
+      }
+      
+      // Valid score
+      input.classList.add('is-valid');
+      currentScores[studentId] = score;
+      
+      // Update percentage
+      const percentage = Math.round((score / perfectScore) * 100);
+      percentageSpan.textContent = percentage + '%';
+      percentageSpan.className = `badge ${percentage >= 75 ? 'bg-success' : percentage >= 50 ? 'bg-warning' : 'bg-danger'}`;
+      
+      // Update status
+      statusIcon.className = 'bi bi-check-circle-fill text-success';
+      
+      updateScoresSummary();
+    }
+
+    // Update scores summary
+    function updateScoresSummary() {
+      const scoresSubmitted = Object.keys(currentScores).length;
+      const totalStudents = studentsData.length;
+      const percentage = totalStudents > 0 ? Math.round((scoresSubmitted / totalStudents) * 100) : 0;
+      
+      document.getElementById('scores-submitted').textContent = scoresSubmitted;
+      document.getElementById('completion-percentage').textContent = percentage + '%';
+    }
+
+    // Save scores to Firestore
+    async function saveScores() {
+      try {
+        showLoading('Saving scores...');
+        
+        // Prepare task score document
+        const taskScoreData = {
+          taskId: currentTaskId,
+          sectionId: currentSectionId,
+          title: taskData.title,
+          category: taskData.type || taskData.category || 'General',
+          rubrics: taskData.rubrics || [],
+          perfectScore: taskData.perfectScore || 100,
+          scores: currentScores,
+          updatedAt: serverTimestamp(),
+          updatedBy: currentUserUid
+        };
+        
+        // Save to taskScores collection
+        await setDoc(doc(db, 'taskScores', currentTaskId), taskScoreData);
+        
+        hideLoading();
+        showAlert(`Successfully saved scores for ${Object.keys(currentScores).length} students!`, 'success');
+        
+      } catch (error) {
+        hideLoading();
+        console.error('Error saving scores:', error);
+        showAlert('Error saving scores: ' + error.message, 'danger');
+      }
+    }
+
+    // Clear all scores
+    async function clearAllScores() {
+      const confirmed = await confirmModal(
+        'Clear All Scores',
+        'Are you sure you want to clear all scores? This action cannot be undone.',
+        { confirmText: 'Clear All', cancelText: 'Cancel', variant: 'warning' }
+      );
+      
+      if (!confirmed) return;
+      
+      currentScores = {};
+      
+      // Clear all input fields
+      studentsData.forEach(student => {
+        const input = document.getElementById(`score-${student.id}`);
+        const percentageSpan = document.getElementById(`percentage-${student.id}`);
+        const statusIcon = document.getElementById(`status-${student.id}`);
+        const errorDiv = document.getElementById(`error-${student.id}`);
+        
+        input.value = '';
+        input.classList.remove('is-valid', 'is-invalid');
+        percentageSpan.textContent = '0%';
+        percentageSpan.className = 'badge bg-danger';
+        statusIcon.className = 'bi bi-circle text-muted';
+        errorDiv.textContent = '';
+      });
+      
+      updateScoresSummary();
+      showAlert('All scores cleared', 'info');
+    }
+
+    // Event listeners
+    document.getElementById('save-scores-btn').addEventListener('click', saveScores);
+    document.getElementById('save-and-continue').addEventListener('click', saveScores);
+    document.getElementById('clear-all-scores').addEventListener('click', clearAllScores);
+
+    // Set up navigation links
+    function setupNavigationLinks() {
+      document.getElementById('section-link').href = `section.html?sectionId=${currentSectionId}`;
+      document.getElementById('tasks-link').href = `section.html?sectionId=${currentSectionId}#tasks`;
+      document.getElementById('back-to-tasks').href = `section.html?sectionId=${currentSectionId}#tasks`;
+    }
+
+    // Authentication and initialization
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.replace('login.html');
+        return;
+      }
+
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (!userDoc.exists() || userDoc.data().role !== 'teacher') {
+          await signOut(auth);
+          window.location.replace('login.html');
+          return;
+        }
+
+        currentUserUid = user.uid;
+        await registerMessaging(user);
+        
+        setupNavigationLinks();
+        showLoading('Loading task details...');
+        
+        await loadTaskDetails();
+        await loadStudents();
+        
+        hideLoading();
+        
+      } catch (error) {
+        hideLoading();
+        console.error('Initialization error:', error);
+        showAlert('Error loading page: ' + error.message, 'danger');
+      }
+    });
+
+    // Logout handler
+    document.getElementById('logout').addEventListener('click', async (e) => {
+      e.preventDefault();
+      const ok = await confirmModal('Sign out', 'Are you sure you want to log out?', 
+        { confirmText: 'Log out', cancelText: 'Stay', variant: 'danger' });
+      if (!ok) return;
+      showLoading('Signing out…');
+      await signOut(auth);
+      window.location.replace('login.html');
+    });
+
+  </script>
+
+</body>
+</html>

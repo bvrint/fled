@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>FLED - Section Hub</title>
+
+  <!-- Favicons -->
+  <link href="../assets/img/favicon.png" rel="icon">
+  <link href="../assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="../assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="../assets/vendor/aos/aos.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="../assets/css/main.css" rel="stylesheet">
+
+  <style>
+    .section-header {
+      background: linear-gradient(135deg, #71c55d 0%, #5ba649 100%);
+      color: white;
+      padding: 2rem 0;
+      margin-bottom: 0;
+    }
+    
+    .section-nav {
+      background: #f8f9fa;
+      border-top: 1px solid #dee2e6;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .nav-tabs {
+      border-bottom: none;
+      background: #f8f9fa;
+    }
+    
+    .nav-tabs .nav-link {
+      border: none;
+      border-radius: 0;
+      padding: 1rem 2rem;
+      font-weight: 600;
+      color: #6c757d;
+      background: transparent;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .nav-tabs .nav-link:hover {
+      color: #495057;
+      background: rgba(255,255,255,0.5);
+    }
+    
+    .nav-tabs .nav-link.active {
+      color: #71c55d;
+      background: white;
+      border-bottom: 3px solid #71c55d;
+    }
+    
+    .nav-tabs .nav-link i {
+      margin-right: 0.5rem;
+    }
+    
+    .tab-content {
+      background: white;
+      min-height: 500px;
+      padding: 0;
+    }
+    
+    .tab-pane {
+      padding: 2rem;
+    }
+    
+    .breadcrumb-nav {
+      background: rgba(255,255,255,0.1);
+      padding: 0.5rem 0;
+      border-radius: 8px;
+    }
+    
+    .breadcrumb {
+      margin: 0;
+      background: transparent;
+    }
+    
+    .breadcrumb-item a {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+    }
+    
+    .breadcrumb-item a:hover {
+      color: white;
+    }
+    
+    .breadcrumb-item.active {
+      color: white;
+    }
+    
+    .section-stats {
+      display: flex;
+      gap: 2rem;
+      margin-top: 1rem;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 2rem;
+      font-weight: bold;
+      display: block;
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    
+    .loading-content {
+      text-align: center;
+      padding: 3rem;
+      color: #6c757d;
+    }
+    
+    .content-container {
+      background: white;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+
+<body>
+
+  <header id="header" class="header d-flex align-items-center sticky-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+      <a href="" class="logo d-flex align-items-center">
+        <h1 class="sitename"><span></span>FLED</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <!-- <li><a href="students.html">Students</a></li>
+          <li><a href="attendance.html">Attendance</a></li>
+          <li><a href="tasks.html">Tasks</a></li>
+          <li><a href="messages.html">Messages</a></li> -->
+          <li><a href="#" id="logout">Logout</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list" aria-label="Toggle navigation"></i>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- Section Header -->
+    <section class="section-header">
+      <div class="container">
+        <nav aria-label="breadcrumb" class="breadcrumb-nav mb-3">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page" id="section-breadcrumb">Section</li>
+          </ol>
+        </nav>
+        
+        <div class="row align-items-center">
+          <div class="col-lg-8">
+            <h1 class="mb-2" id="section-title">Loading Section...</h1>
+            <p class="mb-0 opacity-75" id="section-subtitle">Please wait while we load the section information</p>
+          </div>
+          <div class="col-lg-4">
+            <div class="section-stats" id="section-stats" style="display: none;">
+              <div class="stat-item">
+                <span class="stat-number" id="student-count">0</span>
+                <span class="stat-label">Students</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number" id="task-count">0</span>
+                <span class="stat-label">Tasks</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number" id="message-count">0</span>
+                <span class="stat-label">Messages</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <div class="section-nav">
+      <div class="container">
+        <ul class="nav nav-tabs" id="sectionTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab">
+              <i class="bi bi-people-fill"></i>Students
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="attendance-tab" data-bs-toggle="tab" data-bs-target="#attendance" type="button" role="tab">
+              <i class="bi bi-calendar-check"></i>Attendance
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tasks" type="button" role="tab">
+              <i class="bi bi-list-task"></i>Tasks
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="messages-tab" data-bs-toggle="tab" data-bs-target="#messages" type="button" role="tab">
+              <i class="bi bi-envelope-fill"></i>Messages
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="content-container">
+      <div class="tab-content" id="sectionTabContent">
+        <!-- Students Tab -->
+        <div class="tab-pane fade show active" id="students" role="tabpanel">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3><i class="bi bi-people-fill me-2"></i>Students</h3>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+              <i class="bi bi-person-plus"></i> Add Student
+            </button>
+          </div>
+          <div id="students-content">
+            <div class="loading-content">
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="mt-2">Loading students...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attendance Tab -->
+        <div class="tab-pane fade" id="attendance" role="tabpanel">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3><i class="bi bi-calendar-check me-2"></i>Attendance</h3>
+            <button class="btn btn-success" id="start-attendance-btn">
+              <i class="bi bi-play-circle"></i> Start Attendance
+            </button>
+          </div>
+          <div id="attendance-content">
+            <div class="loading-content">
+              <div class="spinner-border text-success" role="status"></div>
+              <p class="mt-2">Loading attendance...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tasks Tab -->
+        <div class="tab-pane fade" id="tasks" role="tabpanel">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3><i class="bi bi-list-task me-2"></i>Tasks</h3>
+            <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+              <i class="bi bi-plus-circle"></i> Add Task
+            </button>
+          </div>
+          <div id="tasks-content">
+            <div class="loading-content">
+              <div class="spinner-border text-info" role="status"></div>
+              <p class="mt-2">Loading tasks...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages Tab -->
+        <div class="tab-pane fade" id="messages" role="tabpanel">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3><i class="bi bi-envelope-fill me-2"></i>Messages</h3>
+            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#sendMessageModal">
+              <i class="bi bi-send"></i> Send Message
+            </button>
+          </div>
+          <div id="messages-content">
+            <div class="loading-content">
+              <div class="spinner-border text-warning" role="status"></div>
+              <p class="mt-2">Loading messages...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div class="modal fade" id="addStudentModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add New Student</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="addStudentForm">
+              <div class="mb-3">
+                <label for="studentName" class="form-label">Student Name</label>
+                <input type="text" class="form-control" id="studentName" required>
+                <div class="invalid-feedback" id="studentNameFeedback"></div>
+              </div>
+              <div class="mb-3">
+                <label for="studentId" class="form-label">Student ID</label>
+                <input type="text" class="form-control" id="studentId" required>
+                <div class="invalid-feedback" id="studentIdFeedback"></div>
+              </div>
+              <div class="mb-3">
+                <label for="parentPhone" class="form-label">Parent Phone</label>
+                <input type="tel" class="form-control" id="parentPhone" required>
+              </div>
+              <div class="mb-3">
+                <label for="parentEmail" class="form-label">Parent Email</label>
+                <input type="email" class="form-control" id="parentEmail" required>
+              </div>
+              <button type="submit" class="btn btn-primary">Add Student</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Task Modal -->
+    <div class="modal fade" id="addTaskModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add New Task</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="addTaskForm">
+              <div class="mb-3">
+                <label for="taskTitle" class="form-label">Task Title</label>
+                <input type="text" class="form-control" id="taskTitle" required>
+              </div>
+              <div class="mb-3">
+                <label for="taskType" class="form-label">Task Type</label>
+                <select class="form-control" id="taskType" required>
+                  <option value="">Select Type</option>
+                  <option value="Assignment">Assignment</option>
+                  <option value="Quiz">Quiz</option>
+                  <option value="Exam">Exam</option>
+                  <option value="Project">Project</option>
+                  <option value="Homework">Homework</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="taskDeadline" class="form-label">Deadline</label>
+                <input type="datetime-local" class="form-control" id="taskDeadline" required>
+              </div>
+              <div class="mb-3">
+                <label for="taskPerfectScore" class="form-label">Perfect Score</label>
+                <input type="number" class="form-control" id="taskPerfectScore" min="1" max="1000" value="100" required>
+              </div>
+              <div class="mb-3">
+                <label for="taskDescription" class="form-label">Description</label>
+                <textarea class="form-control" id="taskDescription" rows="3"></textarea>
+              </div>
+              
+              <!-- Rubrics Section -->
+              <div class="mb-3">
+                <label class="form-label">Rubrics (Optional)</label>
+                <div id="rubrics-container">
+                  <div class="rubric-item mb-2">
+                    <div class="row g-2">
+                      <div class="col-8">
+                        <input type="text" class="form-control" placeholder="Criteria (e.g., Content, Grammar)" name="rubric-criteria">
+                      </div>
+                      <div class="col-3">
+                        <input type="number" class="form-control" placeholder="Points" min="1" name="rubric-points">
+                      </div>
+                      <div class="col-1">
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeRubric(this)">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="add-rubric-btn">
+                  <i class="bi bi-plus"></i> Add Rubric
+                </button>
+              </div>
+              
+              <button type="submit" class="btn btn-info">Create Task</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Send Message Modal -->
+    <div class="modal fade" id="sendMessageModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Send Message</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="sendMessageForm">
+              <div class="mb-3">
+                <label for="messageSubject" class="form-label">Subject</label>
+                <input type="text" class="form-control" id="messageSubject" required>
+              </div>
+              <div class="mb-3">
+                <label for="messageRecipient" class="form-label">Send To</label>
+                <select class="form-control" id="messageRecipient" required>
+                  <option value="all">All Parents</option>
+                  <option value="specific">Specific Parent</option>
+                </select>
+              </div>
+              <div class="mb-3" id="specificParentDiv" style="display: none;">
+                <label for="specificParent" class="form-label">Select Parent</label>
+                <select class="form-control" id="specificParent">
+                  <option value="">Loading parents...</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="messageContent" class="form-label">Message</label>
+                <textarea class="form-control" id="messageContent" rows="4" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-warning">Send Message</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Vendor JS Files -->
+  <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <script type="module">
+    import { auth, db } from "./js/firebase.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { collection, query, where, getDocs, addDoc, doc, getDoc, serverTimestamp, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { showLoading, hideLoading, showAlert, confirmModal } from "./js/ui.js";
+    import { registerMessaging } from "./js/fcm.js";
+
+    let currentSectionId = null;
+    let currentSectionData = null;
+    let currentUserUid = null;
+    let existingStudents = []; // Cache for duplicate checking
+
+    // Real-time validation functions
+    function validateStudentName(name) {
+      const nameExists = existingStudents.some(student => 
+        student.name.toLowerCase() === name.toLowerCase()
+      );
+      const nameInput = document.getElementById('studentName');
+      const feedback = document.getElementById('studentNameFeedback');
+      
+      if (name && nameExists) {
+        nameInput.classList.add('is-invalid');
+        nameInput.classList.remove('is-valid');
+        feedback.textContent = `A student named "${name}" already exists in this section.`;
+        return false;
+      } else if (name) {
+        nameInput.classList.add('is-valid');
+        nameInput.classList.remove('is-invalid');
+        feedback.textContent = '';
+        return true;
+      } else {
+        nameInput.classList.remove('is-valid', 'is-invalid');
+        feedback.textContent = '';
+        return false;
+      }
+    }
+
+    function validateStudentId(studentId) {
+      const idExists = existingStudents.some(student => 
+        student.studentId.toLowerCase() === studentId.toLowerCase()
+      );
+      const idInput = document.getElementById('studentId');
+      const feedback = document.getElementById('studentIdFeedback');
+      
+      if (studentId && idExists) {
+        idInput.classList.add('is-invalid');
+        idInput.classList.remove('is-valid');
+        feedback.textContent = `Student ID "${studentId}" already exists in this section.`;
+        return false;
+      } else if (studentId) {
+        idInput.classList.add('is-valid');
+        idInput.classList.remove('is-invalid');
+        feedback.textContent = '';
+        return true;
+      } else {
+        idInput.classList.remove('is-valid', 'is-invalid');
+        feedback.textContent = '';
+        return false;
+      }
+    }
+
+    // Get section ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    currentSectionId = urlParams.get('sectionId');
+
+    if (!currentSectionId) {
+      window.location.replace('dashboard.html');
+    }
+
+    // Load section information
+    async function loadSectionInfo() {
+      try {
+        const sectionDoc = await getDoc(doc(db, 'sections', currentSectionId));
+        if (sectionDoc.exists()) {
+          currentSectionData = { id: sectionDoc.id, ...sectionDoc.data() };
+          
+          // Update header
+          document.getElementById('section-title').textContent = currentSectionData.name;
+          document.getElementById('section-subtitle').textContent = `Grade ${currentSectionData.grade}`;
+          document.getElementById('section-breadcrumb').textContent = currentSectionData.name;
+          
+          // Update stats (will be loaded by individual tab functions)
+          document.getElementById('section-stats').style.display = 'flex';
+          
+          return currentSectionData;
+        } else {
+          throw new Error('Section not found');
+        }
+      } catch (error) {
+        console.error('Error loading section:', error);
+        showAlert('Error loading section information', 'danger');
+        setTimeout(() => window.location.replace('dashboard.html'), 2000);
+      }
+    }
+
+    // Load students content
+    async function loadStudentsContent() {
+      try {
+        const studentsQuery = query(
+          collection(db, 'students'),
+          where('sectionId', '==', currentSectionId),
+          where('ownerUid', '==', currentUserUid)
+        );
+        const studentsSnapshot = await getDocs(studentsQuery);
+        
+        // Update existingStudents cache for duplicate checking
+        existingStudents = studentsSnapshot.docs.map(doc => doc.data());
+        
+        const studentsHtml = `
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>Name</th>
+                  <th>Student ID</th>
+                  <th>Grade</th>
+                  <th>Parent Phone</th>
+                  <th>Parent Email</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${studentsSnapshot.docs.map(doc => {
+                  const student = doc.data();
+                  return `
+                    <tr>
+                      <td><strong>${student.name}</strong></td>
+                      <td>${student.studentId}</td>
+                      <td><span class="badge bg-primary">${student.grade}</span></td>
+                      <td>${student.parentPhone || '-'}</td>
+                      <td>${student.parentEmail || '-'}</td>
+                      <td>
+                        <button class="btn btn-sm btn-outline-warning" onclick="editStudent('${doc.id}')">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${doc.id}')">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+        
+        document.getElementById('students-content').innerHTML = studentsHtml;
+        document.getElementById('student-count').textContent = studentsSnapshot.size;
+        
+      } catch (error) {
+        console.error('Error loading students:', error);
+        document.getElementById('students-content').innerHTML = '<div class="alert alert-danger">Error loading students</div>';
+      }
+    }
+
+    // Load attendance content
+    async function loadAttendanceContent() {
+      try {
+        const attendanceQuery = query(
+          collection(db, 'attendanceSessions'),
+          where('sectionId', '==', currentSectionId),
+          where('ownerUid', '==', currentUserUid)
+        );
+        const attendanceSnapshot = await getDocs(attendanceQuery);
+        
+        const attendanceHtml = `
+          <div class="row">
+            <div class="col-12">
+              <h5>Recent Attendance Sessions</h5>
+              ${attendanceSnapshot.size === 0 ? 
+                '<div class="alert alert-info">No attendance sessions yet. Click "Start Attendance" to begin!</div>' :
+                `<div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Present</th>
+                        <th>Absent</th>
+                        <th>Late</th>
+                        <th>Cutting</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${attendanceSnapshot.docs.map(doc => {
+                        const session = doc.data();
+                        const date = session.startTime ? new Date(session.startTime.seconds * 1000) : new Date();
+                        
+                        // Calculate counts from studentAttendance
+                        const attendance = session.studentAttendance || {};
+                        const presentCount = Object.values(attendance).filter(s => (s.finalStatus || s.timeInStatus) === 'present').length;
+                        const absentCount = Object.values(attendance).filter(s => (s.finalStatus || s.timeInStatus) === 'absent').length;
+                        const lateCount = Object.values(attendance).filter(s => (s.finalStatus || s.timeInStatus) === 'late').length;
+                        const cuttingCount = Object.values(attendance).filter(s => (s.finalStatus || s.timeInStatus) === 'cutting').length;
+                        
+                        return `
+                          <tr>
+                            <td>${date.toLocaleDateString()}</td>
+                            <td><span class="badge ${session.status === 'finalized' ? 'bg-success' : 'bg-warning'}">${session.status === 'finalized' ? 'Recorded' : 'In Progress'}</span></td>
+                            <td><span class="badge bg-success">${presentCount}</span></td>
+                            <td><span class="badge bg-danger">${absentCount}</span></td>
+                            <td><span class="badge bg-warning">${lateCount}</span></td>
+                            <td><span class="badge bg-dark">${cuttingCount}</span></td>
+                            <td>
+                              <button class="btn btn-sm btn-outline-primary" onclick="viewAttendance('${doc.id}')">
+                                <i class="bi bi-eye"></i>
+                              </button>
+                            </td>
+                          </tr>
+                        `;
+                      }).join('')}
+                    </tbody>
+                  </table>
+                </div>`
+              }
+            </div>
+          </div>
+        `;
+        
+        document.getElementById('attendance-content').innerHTML = attendanceHtml;
+        
+      } catch (error) {
+        console.error('Error loading attendance:', error);
+        document.getElementById('attendance-content').innerHTML = '<div class="alert alert-danger">Error loading attendance</div>';
+      }
+    }
+
+    // Load tasks content
+    async function loadTasksContent() {
+      try {
+        const tasksQuery = query(
+          collection(db, 'tasks'),
+          where('sectionId', '==', currentSectionId),
+          where('ownerUid', '==', currentUserUid)
+        );
+        const tasksSnapshot = await getDocs(tasksQuery);
+        
+        const tasksHtml = `
+          <div class="row">
+            ${tasksSnapshot.size === 0 ?
+              '<div class="col-12"><div class="alert alert-info">No tasks assigned yet. Click "Add Task" to create one!</div></div>' :
+              tasksSnapshot.docs.map(doc => {
+                const task = doc.data();
+                const dueDate = task.deadline ? (task.deadline.toDate ? task.deadline.toDate() : new Date(task.deadline)) : null;
+                const perfectScore = task.perfectScore || 100;
+                return `
+                  <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                          <h6 class="card-title">${task.title}</h6>
+                          <span class="badge bg-info">${task.type || 'Task'}</span>
+                        </div>
+                        <p class="card-text small text-muted">${task.description || 'No description'}</p>
+                        <div class="mb-2">
+                          <small class="text-muted">Perfect Score: </small>
+                          <span class="badge bg-success">${perfectScore} pts</span>
+                        </div>
+                        ${dueDate ? `<p class="card-text"><small class="text-muted"><i class="bi bi-calendar-event"></i> Due: ${dueDate.toLocaleDateString()}</small></p>` : ''}
+                      </div>
+                      <div class="card-footer">
+                        <div class="d-grid gap-1">
+                          <a href="task-details.html?sectionId=${currentSectionId}&taskId=${doc.id}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-clipboard-check"></i> Grade Task
+                          </a>
+                          <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="editTask('${doc.id}')">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTask('${doc.id}')">Delete</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')
+            }
+          </div>
+        `;
+        
+        document.getElementById('tasks-content').innerHTML = tasksHtml;
+        document.getElementById('task-count').textContent = tasksSnapshot.size;
+        
+      } catch (error) {
+        console.error('Error loading tasks:', error);
+        document.getElementById('tasks-content').innerHTML = '<div class="alert alert-danger">Error loading tasks</div>';
+      }
+    }
+
+    // Load messages content
+    async function loadMessagesContent() {
+      try {
+        const messagesQuery = query(
+          collection(db, 'messages'),
+          where('sectionId', '==', currentSectionId),
+          where('ownerUid', '==', currentUserUid)
+        );
+        const messagesSnapshot = await getDocs(messagesQuery);
+        
+        const messagesHtml = `
+          <div class="row">
+            ${messagesSnapshot.size === 0 ?
+              '<div class="col-12"><div class="alert alert-info">No messages sent yet. Click "Send Message" to communicate with parents!</div></div>' :
+              messagesSnapshot.docs.map(doc => {
+                const message = doc.data();
+                const sentDate = message.createdAt ? new Date(message.createdAt.seconds * 1000) : new Date();
+                return `
+                  <div class="col-12 mb-3">
+                    <div class="card">
+                      <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                          <h6 class="card-title">${message.subject || 'No Subject'}</h6>
+                          <small class="text-muted">${sentDate.toLocaleDateString()}</small>
+                        </div>
+                        <p class="card-text">${message.message}</p>
+                        <small class="text-muted">Sent to: ${message.recipientType || 'All parents'}</small>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')
+            }
+          </div>
+        `;
+        
+        document.getElementById('messages-content').innerHTML = messagesHtml;
+        document.getElementById('message-count').textContent = messagesSnapshot.size;
+        
+      } catch (error) {
+        console.error('Error loading messages:', error);
+        document.getElementById('messages-content').innerHTML = '<div class="alert alert-danger">Error loading messages</div>';
+      }
+    }
+
+    // Tab switching functionality
+    const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
+    tabButtons.forEach(button => {
+      button.addEventListener('shown.bs.tab', function(event) {
+        const target = event.target.getAttribute('data-bs-target');
+        
+        switch(target) {
+          case '#students':
+            loadStudentsContent();
+            break;
+          case '#attendance':
+            loadAttendanceContent();
+            break;
+          case '#tasks':
+            loadTasksContent();
+            break;
+          case '#messages':
+            loadMessagesContent();
+            break;
+        }
+      });
+    });
+
+    // Add student form handler
+    document.getElementById('addStudentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.submitter || e.target.querySelector('button[type="submit"]');
+      if (btn) btn.disabled = true;
+      
+      try {
+        const name = document.getElementById('studentName').value.trim();
+        const studentId = document.getElementById('studentId').value.trim();
+        const parentPhone = document.getElementById('parentPhone').value.trim();
+        const parentEmail = document.getElementById('parentEmail').value.trim();
+
+        // Check for duplicate student name and ID in the same section
+        const duplicateQuery = query(
+          collection(db, 'students'),
+          where('sectionId', '==', currentSectionId),
+          where('ownerUid', '==', currentUserUid)
+        );
+        const duplicateSnapshot = await getDocs(duplicateQuery);
+        
+        const existingStudents = duplicateSnapshot.docs.map(doc => doc.data());
+        const nameExists = existingStudents.some(student => 
+          student.name.toLowerCase() === name.toLowerCase()
+        );
+        const idExists = existingStudents.some(student => 
+          student.studentId.toLowerCase() === studentId.toLowerCase()
+        );
+        
+        // Use real-time validation results
+        const nameValid = validateStudentName(name);
+        const idValid = validateStudentId(studentId);
+        
+        if (!nameValid || !idValid) {
+          return; // Stop submission if validation fails
+        }
+
+        // Create/find parent
+        const parentQuery = query(
+          collection(db, 'parents'),
+          where('email', '==', parentEmail),
+          where('ownerUid', '==', currentUserUid)
+        );
+        const parentSnapshot = await getDocs(parentQuery);
+        let parentId;
+        
+        if (parentSnapshot.empty) {
+          const parentDoc = await addDoc(collection(db, 'parents'), {
+            name: 'Parent of ' + name,
+            email: parentEmail,
+            phone: parentPhone,
+            linkedStudentIds: [],
+            ownerUid: currentUserUid
+          });
+          parentId = parentDoc.id;
+        } else {
+          parentId = parentSnapshot.docs[0].id;
+        }
+
+        await addDoc(collection(db, 'students'), {
+          name,
+          studentId,
+          grade: currentSectionData.grade,
+          sectionId: currentSectionId,
+          parentId,
+          parentPhone,
+          parentEmail,
+          ownerUid: currentUserUid,
+          createdAt: serverTimestamp()
+        });
+
+        // Update section students list
+        const sectionRef = doc(db, 'sections', currentSectionId);
+        const sectionDoc = await getDoc(sectionRef);
+        const studentsArr = Array.isArray(sectionDoc.data()?.students) ? sectionDoc.data().students : [];
+        studentsArr.push({ name, studentId });
+        await updateDoc(sectionRef, { students: studentsArr });
+
+        document.querySelector('#addStudentModal .btn-close').click();
+        showAlert('Student added successfully!', 'success');
+        loadStudentsContent();
+        e.target.reset();
+        // Clear validation states
+        document.getElementById('studentName').classList.remove('is-valid', 'is-invalid');
+        document.getElementById('studentId').classList.remove('is-valid', 'is-invalid');
+        
+      } catch (error) {
+        console.error('Error adding student:', error);
+        showAlert(error.message, 'danger');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+
+    // Add real-time validation event listeners
+    document.getElementById('studentName').addEventListener('input', function() {
+      const name = this.value.trim();
+      validateStudentName(name);
+    });
+
+    document.getElementById('studentId').addEventListener('input', function() {
+      const studentId = this.value.trim();
+      validateStudentId(studentId);
+    });
+
+    // Clear validation when modal is closed
+    document.getElementById('addStudentModal').addEventListener('hidden.bs.modal', function() {
+      document.getElementById('studentName').classList.remove('is-valid', 'is-invalid');
+      document.getElementById('studentId').classList.remove('is-valid', 'is-invalid');
+      document.getElementById('studentNameFeedback').textContent = '';
+      document.getElementById('studentIdFeedback').textContent = '';
+    });
+
+    // Rubrics management functions
+    window.removeRubric = function(button) {
+      const rubricItem = button.closest('.rubric-item');
+      const container = document.getElementById('rubrics-container');
+      if (container.children.length > 1) {
+        rubricItem.remove();
+      } else {
+        showAlert('At least one rubric item is required', 'warning');
+      }
+    };
+
+    function addRubricItem() {
+      const container = document.getElementById('rubrics-container');
+      const rubricHtml = `
+        <div class="rubric-item mb-2">
+          <div class="row g-2">
+            <div class="col-8">
+              <input type="text" class="form-control" placeholder="Criteria (e.g., Content, Grammar)" name="rubric-criteria">
+            </div>
+            <div class="col-3">
+              <input type="number" class="form-control" placeholder="Points" min="1" name="rubric-points">
+            </div>
+            <div class="col-1">
+              <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeRubric(this)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', rubricHtml);
+    }
+
+    document.getElementById('add-rubric-btn').addEventListener('click', addRubricItem);
+
+    // Add task form handler
+    document.getElementById('addTaskForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.submitter || e.target.querySelector('button[type="submit"]');
+      if (btn) btn.disabled = true;
+      
+      try {
+        const title = document.getElementById('taskTitle').value.trim();
+        const type = document.getElementById('taskType').value;
+        const deadline = document.getElementById('taskDeadline').value;
+        const perfectScore = parseInt(document.getElementById('taskPerfectScore').value);
+        const description = document.getElementById('taskDescription').value.trim();
+
+        // Collect rubrics
+        const rubrics = [];
+        const rubricItems = document.querySelectorAll('.rubric-item');
+        let totalRubricPoints = 0;
+        
+        rubricItems.forEach(item => {
+          const criteria = item.querySelector('input[name="rubric-criteria"]').value.trim();
+          const points = parseInt(item.querySelector('input[name="rubric-points"]').value) || 0;
+          
+          if (criteria && points > 0) {
+            rubrics.push({ criteria, points });
+            totalRubricPoints += points;
+          }
+        });
+
+        // Validate rubrics if provided
+        if (rubrics.length > 0 && totalRubricPoints !== perfectScore) {
+          throw new Error(`Rubric points total (${totalRubricPoints}) must equal perfect score (${perfectScore})`);
+        }
+
+        const taskDoc = await addDoc(collection(db, 'tasks'), {
+          title,
+          type,
+          deadline: deadline ? new Date(deadline) : null,
+          perfectScore,
+          rubrics,
+          description,
+          sectionId: currentSectionId,
+          ownerUid: currentUserUid,
+          createdAt: serverTimestamp()
+        });
+
+        document.querySelector('#addTaskModal .btn-close').click();
+        e.target.reset();
+        
+        // Reset rubrics to default state
+        const container = document.getElementById('rubrics-container');
+        container.innerHTML = `
+          <div class="rubric-item mb-2">
+            <div class="row g-2">
+              <div class="col-8">
+                <input type="text" class="form-control" placeholder="Criteria (e.g., Content, Grammar)" name="rubric-criteria">
+              </div>
+              <div class="col-3">
+                <input type="number" class="form-control" placeholder="Points" min="1" name="rubric-points">
+              </div>
+              <div class="col-1">
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeRubric(this)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        showAlert('Task created successfully! Redirecting to task details...', 'success');
+        
+        // Redirect to task details page
+        setTimeout(() => {
+          window.location.href = `task-details.html?sectionId=${currentSectionId}&taskId=${taskDoc.id}`;
+        }, 1500);
+        
+      } catch (error) {
+        console.error('Error adding task:', error);
+        showAlert(error.message, 'danger');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+
+    // Send message form handler
+    document.getElementById('sendMessageForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.submitter || e.target.querySelector('button[type="submit"]');
+      if (btn) btn.disabled = true;
+      
+      try {
+        const subject = document.getElementById('messageSubject').value.trim();
+        const recipientType = document.getElementById('messageRecipient').value;
+        const content = document.getElementById('messageContent').value.trim();
+
+        await addDoc(collection(db, 'messages'), {
+          subject,
+          message: content,
+          recipientType,
+          sectionId: currentSectionId,
+          ownerUid: currentUserUid,
+          createdAt: serverTimestamp()
+        });
+
+        document.querySelector('#sendMessageModal .btn-close').click();
+        showAlert('Message sent successfully!', 'success');
+        loadMessagesContent();
+        e.target.reset();
+        
+      } catch (error) {
+        console.error('Error sending message:', error);
+        showAlert(error.message, 'danger');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+
+    // Handle recipient type change for messages
+    document.getElementById('messageRecipient').addEventListener('change', function() {
+      const specificDiv = document.getElementById('specificParentDiv');
+      if (this.value === 'specific') {
+        specificDiv.style.display = 'block';
+        // Load parents for this section (simplified - you can enhance this)
+        loadParentsForMessage();
+      } else {
+        specificDiv.style.display = 'none';
+      }
+    });
+
+    // Load parents for message recipient selection
+    async function loadParentsForMessage() {
+      try {
+        const studentsQuery = query(
+          collection(db, 'students'),
+          where('sectionId', '==', currentSectionId),
+          where('ownerUid', '==', currentUserUid)
+        );
+        const studentsSnapshot = await getDocs(studentsQuery);
+        
+        const parentsHtml = '<option value="">Select Parent</option>' + 
+          studentsSnapshot.docs.map(doc => {
+            const student = doc.data();
+            return `<option value="${student.parentEmail}">${student.parentEmail} (${student.name})</option>`;
+          }).join('');
+        
+        document.getElementById('specificParent').innerHTML = parentsHtml;
+      } catch (error) {
+        console.error('Error loading parents:', error);
+      }
+    }
+
+    // View attendance function
+    window.viewAttendance = function(sessionId) {
+      window.location.href = `attendance.html?sectionId=${currentSectionId}&sessionId=${sessionId}`;
+    };
+
+    // Student management functions
+    window.editStudent = function(studentId) {
+      showAlert('Edit functionality will be implemented soon', 'info');
+      // TODO: Implement edit student functionality
+    };
+
+    window.deleteStudent = async function(studentId) {
+      try {
+        const confirmed = await confirmModal(
+          'Delete Student', 
+          'Are you sure you want to delete this student? This action cannot be undone.',
+          { confirmText: 'Delete', cancelText: 'Cancel', variant: 'danger' }
+        );
+        
+        if (!confirmed) return;
+        
+        showLoading('Deleting student...');
+        
+        // Get student data before deletion for section update
+        const studentDoc = await getDoc(doc(db, 'students', studentId));
+        if (!studentDoc.exists()) {
+          throw new Error('Student not found');
+        }
+        
+        const studentData = studentDoc.data();
+        
+        // Delete the student document
+        await deleteDoc(doc(db, 'students', studentId));
+        
+        // Update section students list (remove from summary)
+        const sectionRef = doc(db, 'sections', currentSectionId);
+        const sectionDoc = await getDoc(sectionRef);
+        if (sectionDoc.exists()) {
+          const studentsArr = Array.isArray(sectionDoc.data()?.students) ? sectionDoc.data().students : [];
+          const updatedStudents = studentsArr.filter(s => 
+            s.studentId !== studentData.studentId || s.name !== studentData.name
+          );
+          await updateDoc(sectionRef, { students: updatedStudents });
+        }
+        
+        hideLoading();
+        showAlert('Student deleted successfully!', 'success');
+        
+        // Reload students content to refresh the display
+        await loadStudentsContent();
+        
+      } catch (error) {
+        hideLoading();
+        console.error('Error deleting student:', error);
+        showAlert('Error deleting student: ' + error.message, 'danger');
+      }
+    };
+
+    // Task management functions
+    window.editTask = function(taskId) {
+      showAlert('Edit task functionality will be implemented soon', 'info');
+      // TODO: Implement edit task functionality
+    };
+
+    window.deleteTask = async function(taskId) {
+      try {
+        const confirmed = await confirmModal(
+          'Delete Task', 
+          'Are you sure you want to delete this task? This action cannot be undone.',
+          { confirmText: 'Delete', cancelText: 'Cancel', variant: 'danger' }
+        );
+        
+        if (!confirmed) return;
+        
+        showLoading('Deleting task...');
+        
+        // Delete the task document
+        await deleteDoc(doc(db, 'tasks', taskId));
+        
+        hideLoading();
+        showAlert('Task deleted successfully!', 'success');
+        
+        // Reload tasks content to refresh the display
+        await loadTasksContent();
+        
+      } catch (error) {
+        hideLoading();
+        console.error('Error deleting task:', error);
+        showAlert('Error deleting task: ' + error.message, 'danger');
+      }
+    };
+
+    // Start attendance button handler
+    document.getElementById('start-attendance-btn').addEventListener('click', () => {
+      window.location.href = `attendance.html?sectionId=${currentSectionId}`;
+    });
+
+    // Authentication handler
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.replace('login.html');
+        return;
+      }
+
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (!userDoc.exists() || userDoc.data().role !== 'teacher') {
+          await signOut(auth);
+          window.location.replace('login.html');
+          return;
+        }
+
+        currentUserUid = user.uid;
+        await registerMessaging(user);
+        
+        // Load section information and initial content
+        await loadSectionInfo();
+        await loadStudentsContent(); // Load default tab content
+        
+      } catch (error) {
+        console.error('Authentication error:', error);
+        showAlert(error.message, 'danger');
+      }
+    });
+
+    // Logout handler
+    document.getElementById('logout').addEventListener('click', async (e) => {
+      e.preventDefault();
+      const ok = await confirmModal('Sign out', 'Are you sure you want to log out?', { confirmText: 'Log out', cancelText: 'Stay', variant: 'danger' });
+      if (!ok) return;
+      showLoading('Signing out…');
+      await signOut(auth);
+      window.location.replace('login.html');
+    });
+
+  </script>
+
+</body>
+</html>
