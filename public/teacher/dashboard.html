@@ -50,8 +50,10 @@
     <section class="dashboard section">
       <div class="container">
         <div class="section-title">
-          <h2>My Sections</h2>
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSectionModal">Add New Section</button>
+          <h2>Teacher Dashboard</h2>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSectionModal">
+            <i class="bi bi-plus-circle"></i> Add New Section
+          </button>
         </div>
         <div class="row" id="sectionsContainer">
           <!-- Sections will be loaded here -->
@@ -142,15 +144,10 @@
                   </div>
                   <p class="card-text">Grade: ${section.grade}</p>
                   <p class="card-text">Students: ${count}</p>
-                  <div class="d-grid gap-2">
-                    <div class="btn-group" role="group">
-                      <a href="students.html?sectionId=${section.id}" class="btn btn-primary btn-sm">Students</a>
-                      <a href="attendance.html?sectionId=${section.id}" class="btn btn-secondary btn-sm">Attendance</a>
-                    </div>
-                    <div class="btn-group" role="group">
-                      <a href="tasks.html?sectionId=${section.id}" class="btn btn-info btn-sm">Tasks</a>
-                      <a href="messages.html?sectionId=${section.id}" class="btn btn-success btn-sm">Messages</a>
-                    </div>
+                  <div class="d-grid">
+                    <a href="section.html?sectionId=${section.id}" class="btn btn-primary">
+                      <i class="bi bi-box-arrow-in-right"></i> Enter Section
+                    </a>
                   </div>
                 </div>
               </div>
