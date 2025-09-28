@@ -474,49 +474,14 @@
       return 'Active';
     }
     
-    // Cache for task counts to avoid multiple database calls
-    const taskCounts = new Map();
-    
-    async function getTotalTasks(sectionId) {
-      if (taskCounts.has(sectionId)) {
-        return taskCounts.get(sectionId);
-      }
-      
-      try {
-        const tasksQuery = query(
-          collection(db, 'tasks'),
-          where('sectionId', '==', sectionId),
-          where('ownerUid', '==', currentUser.uid)
-        );
-        const tasksSnapshot = await getDocs(tasksQuery);
-        const count = tasksSnapshot.size;
-        taskCounts.set(sectionId, count);
-        return count;
-      } catch (error) {
-        console.error('Error getting task count:', error);
-        return 0;
-      }
-    }
+
     
     function getTotalMessages(sectionId) {
       // This would ideally fetch from database, but for now return placeholder
       return Math.floor(Math.random() * 5);
     }
 
-    // Function to load task counts for all sections
-    async function loadTaskCounts(sectionsData) {
-      for (const section of sectionsData) {
-        try {
-          const taskCount = await getTotalTasks(section.id);
-          const taskCountElement = document.getElementById(`task-count-${section.id}`);
-          if (taskCountElement) {
-            taskCountElement.textContent = taskCount;
-          }
-        } catch (error) {
-          console.error(`Error loading task count for section ${section.id}:`, error);
-        }
-      }
-    }
+
 
     async function loadSections(teacherId) {
       const q = query(
@@ -572,14 +537,6 @@
                     <div class="stat-item">
                       <span class="stat-number">${count}</span>
                       <span class="stat-label">Students</span>
-                    </div>
-                    <div class="stat-item">
-                      <span class="stat-number" id="task-count-${section.id}">0</span>
-                      <span class="stat-label">Tasks</span>
-                    </div>
-                    <div class="stat-item">
-                      <span class="stat-number">${getTotalMessages(section.id) || 0}</span>
-                      <span class="stat-label">Messages</span>
                     </div>
                   </div>
                   
@@ -639,14 +596,6 @@
                       <span class="stat-number">${count}</span>
                       <span class="stat-label">Students</span>
                     </div>
-                    <div class="stat-item">
-                      <span class="stat-number" id="task-count-${section.id}">0</span>
-                      <span class="stat-label">Tasks</span>
-                    </div>
-                    <div class="stat-item">
-                      <span class="stat-number">${getTotalMessages(section.id) || 0}</span>
-                      <span class="stat-label">Messages</span>
-                    </div>
                   </div>
                   
                   <div class="mb-3">
@@ -686,10 +635,6 @@
               </button>
             </div>
           </div>`;
-      } else {
-        // Load task counts for all sections after they are rendered
-        const allSections = [...activeSections, ...archivedSections];
-        await loadTaskCounts(allSections);
       }
     }
 
