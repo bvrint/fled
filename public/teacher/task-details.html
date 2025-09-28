@@ -638,9 +638,11 @@
     currentSectionId = urlParams.get('sectionId');
     currentTaskId = urlParams.get('taskId');
 
+    // Validate required parameters - but don't throw error immediately
+    let hasValidParameters = true;
     if (!currentSectionId || !currentTaskId) {
-      showAlert('Missing required parameters. Redirecting to dashboard.', 'warning');
-      setTimeout(() => window.location.replace('dashboard.html'), 2000);
+      console.error('Missing required parameters:', { currentSectionId, currentTaskId });
+      hasValidParameters = false;
     }
 
     // Load task details
@@ -654,22 +656,27 @@
         taskData = { id: taskDoc.id, ...taskDoc.data() };
         
         // Update UI with task information
-        document.getElementById('task-title').textContent = taskData.title;
-        document.getElementById('task-description').textContent = taskData.description || 'No description provided';
-        document.getElementById('task-category').textContent = taskData.type || taskData.category || 'General';
-        document.getElementById('perfect-score').textContent = taskData.perfectScore || 100;
+        const taskTitle = document.getElementById('task-title');
+        if (taskTitle) taskTitle.textContent = taskData.title;
+        
+        const taskDescription = document.getElementById('task-description');
+        if (taskDescription) taskDescription.textContent = taskData.description || 'No description provided';
+        
+        const taskCategory = document.getElementById('task-category');
+        if (taskCategory) taskCategory.textContent = taskData.type || taskData.category || 'General';
+        
+        const perfectScore = document.getElementById('perfect-score');
+        if (perfectScore) perfectScore.textContent = taskData.perfectScore || 100;
         
         // Format deadline
         if (taskData.deadline) {
           const deadline = taskData.deadline.toDate ? taskData.deadline.toDate() : new Date(taskData.deadline);
-          document.getElementById('task-deadline').textContent = deadline.toLocaleDateString();
+          const taskDeadline = document.getElementById('task-deadline');
+          if (taskDeadline) taskDeadline.textContent = deadline.toLocaleDateString();
         }
         
         // Load rubrics
         loadRubrics(taskData.rubrics || []);
-        
-        // Update breadcrumb
-        document.getElementById('task-breadcrumb').textContent = taskData.title;
         
       } catch (error) {
         console.error('Error loading task:', error);
@@ -929,16 +936,33 @@
       showAlert('All scores cleared', 'info');
     }
 
-    // Event listeners
-    document.getElementById('save-scores-btn').addEventListener('click', saveScores);
-    document.getElementById('save-and-continue').addEventListener('click', saveScores);
-    document.getElementById('clear-all-scores').addEventListener('click', clearAllScores);
+    // Event listeners - with null checks
+    const saveScoresBtn = document.getElementById('save-scores-btn');
+    if (saveScoresBtn) {
+      saveScoresBtn.addEventListener('click', saveScores);
+    }
+    
+    const saveAndContinue = document.getElementById('save-and-continue');
+    if (saveAndContinue) {
+      saveAndContinue.addEventListener('click', saveScores);
+    }
+    
+    const clearAllButton = document.getElementById('clear-all-scores');
+    if (clearAllButton) {
+      clearAllButton.addEventListener('click', clearAllScores);
+    }
 
     // Set up navigation links
     function setupNavigationLinks() {
-      document.getElementById('section-link').href = `section.html?sectionId=${currentSectionId}`;
-      document.getElementById('tasks-link').href = `section.html?sectionId=${currentSectionId}#tasks`;
-      document.getElementById('back-to-tasks').href = `section.html?sectionId=${currentSectionId}#tasks`;
+      const sectionLink = document.getElementById('section-link');
+      if (sectionLink) {
+        sectionLink.href = `section.html?sectionId=${currentSectionId}`;
+      }
+      
+      const backToTasks = document.getElementById('back-to-tasks');
+      if (backToTasks) {
+        backToTasks.href = `section.html?sectionId=${currentSectionId}#tasks`;
+      }
     }
 
     // Authentication and initialization
@@ -958,6 +982,13 @@
 
         currentUserUid = user.uid;
         await registerMessaging(user);
+        
+        // Check if we have valid parameters before proceeding
+        if (!hasValidParameters) {
+          showAlert('Missing required parameters. Redirecting to dashboard.', 'warning');
+          setTimeout(() => window.location.replace('dashboard.html'), 2000);
+          return;
+        }
         
         setupNavigationLinks();
         showLoading('Loading task details...');
