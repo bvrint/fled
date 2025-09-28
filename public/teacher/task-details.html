@@ -24,55 +24,431 @@
   <link href="../assets/css/main.css" rel="stylesheet">
 
   <style>
+    /* Modern Task Details Styling */
     .task-header {
       background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
       color: white;
-      padding: 2rem 0;
+      padding: 3rem 0 2rem 0;
       margin-bottom: 2rem;
+      border-radius: 0 0 30px 30px;
+      box-shadow: 0 8px 25px rgba(23, 162, 184, 0.15);
     }
-    
-    .rubric-item {
-      background: #f8f9fa;
-      border-left: 4px solid #17a2b8;
-      padding: 0.75rem;
+
+    .task-header h1 {
+      font-weight: 700;
       margin-bottom: 0.5rem;
-      border-radius: 0.25rem;
+    }
+
+    .task-header .subtitle {
+      opacity: 0.9;
+      font-size: 1.1rem;
+    }
+
+    .breadcrumb {
+      background: transparent;
+      padding: 0;
+      margin-bottom: 1.5rem;
+    }
+
+    .breadcrumb-item a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+    }
+
+    .breadcrumb-item a:hover {
+      color: white;
+    }
+
+    .breadcrumb-item.active {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Enhanced Cards */
+    .card {
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      margin-bottom: 2rem;
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+      color: white;
+      border-radius: 20px 20px 0 0 !important;
+      border-bottom: none;
+      padding: 1.5rem;
+    }
+
+    .card-header h5 {
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+    }
+
+    .card-header small {
+      opacity: 0.9;
+    }
+
+    .card-body {
+      padding: 2rem;
+    }
+
+    .task-info-card {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
     }
     
+    /* Rubric Styling */
+    .rubric-item {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-left: 5px solid #17a2b8;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .rubric-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .rubric-criteria {
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    .rubric-points {
+      font-weight: 700;
+      color: #17a2b8;
+      font-size: 1.2rem;
+    }
+    
+    /* Score Input Styling */
     .score-input {
-      width: 80px;
+      width: 100px;
+      text-align: center;
+      font-weight: 600;
+      border-radius: 10px;
+      border: 2px solid #dee2e6;
+      transition: all 0.3s ease;
+    }
+
+    .score-input:focus {
+      border-color: #17a2b8;
+      box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
     }
     
     .score-input.is-invalid {
       border-color: #dc3545;
+      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
     }
     
     .score-input.is-valid {
       border-color: #28a745;
+      box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+
+    /* Enhanced Badges */
+    .badge {
+      padding: 0.6rem 1.2rem;
+      border-radius: 25px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
     .perfect-score-badge {
-      background: linear-gradient(45deg, #28a745, #20c997);
+      background: linear-gradient(135deg, #28a745, #20c997);
       color: white;
+      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
     }
     
     .deadline-badge {
-      background: linear-gradient(45deg, #ffc107, #e0a800);
+      background: linear-gradient(135deg, #ffc107, #e0a800);
       color: #212529;
+      box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
     }
-    
-    .task-info-card {
+
+    .task-type-badge {
+      background: linear-gradient(135deg, #6f42c1, #5a32a3);
+      color: white;
+      box-shadow: 0 4px 15px rgba(111, 66, 193, 0.2);
+    }
+
+    /* Enhanced Table */
+    .table {
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .table thead {
+      background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+      color: white;
+    }
+
+    .table thead th {
       border: none;
-      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      padding: 1.25rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.875rem;
     }
-    
-    .student-score-row:hover {
-      background-color: #f8f9fa;
+
+    .table tbody tr {
+      transition: all 0.3s ease;
+    }
+
+    .table tbody tr:hover, .student-score-row:hover {
+      background: linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, rgba(19, 132, 150, 0.1) 100%);
+    }
+
+    .table tbody td {
+      padding: 1.5rem 1.25rem;
+      border-color: #f8f9fa;
+      vertical-align: middle;
+    }
+
+    /* Student Avatar */
+    .student-avatar {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #17a2b8, #138496);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1.3rem;
+      margin-right: 1rem;
+      box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+    }
+
+    /* Enhanced Buttons */
+    .btn {
+      border-radius: 12px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+      color: white;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+      color: white;
+    }
+
+    .btn-info {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+      color: white;
+    }
+
+    .btn-info:hover {
+      background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+      color: white;
+    }
+
+    .btn-lg {
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+    }
+
+    /* Statistics Cards */
+    .stats-row {
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      height: 100%;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #17a2b8, #138496);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      color: #6c757d;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.9rem;
+    }
+
+    /* Score Progress Bars */
+    .score-progress {
+      background: #f8f9fa;
+      border-radius: 10px;
+      height: 8px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+
+    .score-progress-bar {
+      height: 100%;
+      transition: width 0.5s ease;
+      border-radius: 10px;
+    }
+
+    .score-progress-bar.excellent {
+      background: linear-gradient(135deg, #28a745, #20c997);
+    }
+
+    .score-progress-bar.good {
+      background: linear-gradient(135deg, #20c997, #17a2b8);
+    }
+
+    .score-progress-bar.fair {
+      background: linear-gradient(135deg, #ffc107, #e0a800);
+    }
+
+    .score-progress-bar.poor {
+      background: linear-gradient(135deg, #dc3545, #c82333);
     }
     
     .validation-message {
       font-size: 0.875rem;
-      margin-top: 0.25rem;
+      margin-top: 0.5rem;
+      font-weight: 500;
+    }
+
+    /* Alert Enhancements */
+    .alert {
+      border: none;
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .alert-info {
+      background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+      color: #0c5460;
+    }
+
+    .alert-warning {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      color: #856404;
+    }
+
+    .alert-success {
+      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+      color: #155724;
+    }
+
+    /* Loading States */
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 20px;
+    }
+
+    .spinner-border {
+      color: #17a2b8;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .task-header {
+        padding: 2rem 0 1.5rem 0;
+      }
+
+      .card-body {
+        padding: 1.5rem;
+      }
+
+      .rubric-item {
+        padding: 1rem;
+      }
+
+      .btn-lg {
+        width: 100%;
+        margin-bottom: 1rem;
+      }
+
+      .score-input {
+        width: 80px;
+      }
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      color: #dee2e6;
+      margin-bottom: 1.5rem;
+    }
+
+    .empty-state h5 {
+      color: #6c757d;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+      color: #adb5bd;
+      font-size: 1.1rem;
     }
   </style>
 </head>
@@ -101,21 +477,42 @@
       <div class="container">
         <nav aria-label="breadcrumb" class="mb-3">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="dashboard.html" class="text-white-50">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="#" id="section-link" class="text-white-50">Section</a></li>
-            <li class="breadcrumb-item"><a href="#" id="tasks-link" class="text-white-50">Tasks</a></li>
-            <li class="breadcrumb-item active text-white" aria-current="page" id="task-breadcrumb">Task Details</li>
+            <li class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="#" id="section-link">Section</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Task Grading</li>
           </ol>
         </nav>
         
         <div class="row align-items-center">
           <div class="col-lg-8">
-            <h1 class="mb-2" id="task-title">Loading Task...</h1>
-            <p class="mb-0 opacity-75" id="task-description">Please wait while we load the task information</p>
+            <h1 id="task-title">Loading Task...</h1>
+            <p class="subtitle mb-0" id="task-description">Grade student submissions and provide feedback</p>
           </div>
-          <div class="col-lg-4 text-end">
-            <div class="d-flex gap-2 justify-content-end flex-wrap">
-              <span class="badge perfect-score-badge fs-6" id="perfect-score-badge">
+          <div class="col-lg-4">
+            <div class="row g-3" id="task-stats" style="display: none;">
+              <div class="col-6">
+                <div class="stat-card">
+                  <div class="stat-number" id="total-students">0</div>
+                  <div class="stat-label">Students</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="stat-card">
+                  <div class="stat-number" id="graded-count">0</div>
+                  <div class="stat-label">Graded</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="row mt-4" id="task-badges" style="display: none;">
+          <div class="col-12">
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+              <span class="badge task-type-badge fs-6" id="task-type-badge">
+                <i class="bi bi-bookmark"></i> <span id="task-type">Task</span>
+              </span>
+              <span class="badge perfect-score-badge fs-6">
                 <i class="bi bi-trophy"></i> Perfect Score: <span id="perfect-score">0</span>
               </span>
               <span class="badge deadline-badge fs-6" id="deadline-badge">

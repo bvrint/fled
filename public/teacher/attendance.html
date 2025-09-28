@@ -22,6 +22,363 @@
 
   <!-- Main CSS File -->
   <link href="../assets/css/main.css" rel="stylesheet">
+
+  <style>
+    /* Modern Attendance Styling */
+    .attendance-header {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      padding: 3rem 0 2rem 0;
+      margin-bottom: 2rem;
+      border-radius: 0 0 30px 30px;
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.15);
+    }
+
+    .attendance-header h1 {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .attendance-header .subtitle {
+      opacity: 0.9;
+      font-size: 1.1rem;
+    }
+
+    .breadcrumb {
+      background: transparent;
+      padding: 0;
+      margin-bottom: 1.5rem;
+    }
+
+    .breadcrumb-item a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+    }
+
+    .breadcrumb-item a:hover {
+      color: white;
+    }
+
+    .breadcrumb-item.active {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Enhanced Cards */
+    .card {
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      margin-bottom: 2rem;
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, #71c55d 0%, #5ba649 100%);
+      color: white;
+      border-radius: 20px 20px 0 0 !important;
+      border-bottom: none;
+      padding: 1.5rem;
+    }
+
+    .card-header h5 {
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+    }
+
+    .card-header small {
+      opacity: 0.9;
+    }
+
+    .card-body {
+      padding: 2rem;
+    }
+
+    /* Status Banners */
+    .alert {
+      border: none;
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .alert-info {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+      color: white;
+    }
+
+    .alert-warning {
+      background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+      color: #212529;
+    }
+
+    .alert-success {
+      background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+      color: white;
+    }
+
+    /* Enhanced Buttons */
+    .btn {
+      border-radius: 12px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+      color: white;
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+      color: #212529;
+    }
+
+    .btn-warning:hover {
+      background: linear-gradient(135deg, #e0a800 0%, #d39e00 100%);
+      color: #212529;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+      color: white;
+    }
+
+    .btn-lg {
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+    }
+
+    /* Enhanced Table */
+    .table {
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .table thead {
+      background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+      color: white;
+    }
+
+    .table thead th {
+      border: none;
+      padding: 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.875rem;
+    }
+
+    .table tbody tr {
+      transition: all 0.3s ease;
+    }
+
+    .table tbody tr:hover {
+      background: linear-gradient(135deg, rgba(113, 197, 93, 0.1) 0%, rgba(91, 166, 73, 0.1) 100%);
+    }
+
+    .table tbody td {
+      padding: 1.25rem 1rem;
+      border-color: #f8f9fa;
+      vertical-align: middle;
+    }
+
+    /* Status Badges */
+    .badge {
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Student Avatar */
+    .student-avatar {
+      width: 45px;
+      height: 45px;
+      background: linear-gradient(135deg, #71c55d, #5ba649);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-right: 1rem;
+      box-shadow: 0 3px 10px rgba(113, 197, 93, 0.3);
+    }
+
+    /* Attendance Action Buttons */
+    .attendance-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    .attendance-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .attendance-btn.present {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+    }
+
+    .attendance-btn.late {
+      background: linear-gradient(135deg, #ffc107, #e0a800);
+      color: #212529;
+    }
+
+    .attendance-btn.absent {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+      color: white;
+    }
+
+    .attendance-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .attendance-btn.selected {
+      border-color: #495057;
+      box-shadow: 0 0 0 3px rgba(73, 80, 87, 0.25);
+    }
+
+    /* Statistics Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #71c55d, #5ba649);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      color: #6c757d;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.9rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .attendance-header {
+        padding: 2rem 0 1.5rem 0;
+      }
+
+      .btn-lg {
+        width: 100%;
+        margin-bottom: 1rem;
+      }
+
+      .attendance-actions {
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Loading States */
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 20px;
+    }
+
+    .spinner-border {
+      color: #71c55d;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      color: #dee2e6;
+      margin-bottom: 1.5rem;
+    }
+
+    .empty-state h5 {
+      color: #6c757d;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+      color: #adb5bd;
+      font-size: 1.1rem;
+    }
+  </style>
 </head>
 
 <body>
@@ -46,6 +403,33 @@
   </header>
 
   <main class="main">
+    <!-- Attendance Header -->
+    <section class="attendance-header">
+      <div class="container">
+        <nav aria-label="breadcrumb" class="mb-3">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="#" id="section-link">Section</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Attendance</li>
+          </ol>
+        </nav>
+        
+        <div class="row align-items-center">
+          <div class="col-lg-8">
+            <h1 id="section-title">Loading Section...</h1>
+            <p class="subtitle mb-0" id="section-subtitle">Manage student attendance and track participation</p>
+          </div>
+          <div class="col-lg-4">
+            <div class="stats-grid" id="attendance-stats" style="display: none;">
+              <div class="stat-card">
+                <div class="stat-number" id="total-students">0</div>
+                <div class="stat-label">Total Students</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section class="attendance section">
       <div class="container">
@@ -53,7 +437,7 @@
         <div class="row mb-4">
           <div class="col-12">
             <div id="sessionStatusBanner" class="alert alert-info text-center">
-              <h5 class="mb-0">Session Status: <span id="sessionStatus">No Session</span></h5>
+              <h5 class="mb-2"><i class="bi bi-clock-history me-2"></i>Session Status: <span id="sessionStatus">No Session</span></h5>
               <small id="sessionDate"></small>
             </div>
           </div>
