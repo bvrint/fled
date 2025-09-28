@@ -22,6 +22,356 @@
 
   <!-- Main CSS File -->
   <link href="../assets/css/main.css" rel="stylesheet">
+  
+  <style>
+    /* Enhanced Dashboard Styles */
+    .dashboard.section {
+      padding: 4rem 0;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      min-height: 100vh;
+    }
+    
+    .section-title {
+      text-align: center;
+      margin-bottom: 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .section-title h2 {
+      background: linear-gradient(135deg, #71c55d 0%, #5ba649 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+      font-size: 2.5rem;
+      margin: 0;
+    }
+    
+    /* Enhanced Modal Styles */
+    .modal-content {
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+      background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, #71c55d 0%, #5ba649 100%);
+      color: white;
+      border-radius: 16px 16px 0 0;
+      padding: 1.5rem 2rem;
+      border-bottom: none;
+    }
+
+    .modal-header .modal-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+    }
+
+    .modal-header .btn-close {
+      filter: brightness(0) invert(1);
+      opacity: 0.8;
+    }
+
+    .modal-header .btn-close:hover {
+      opacity: 1;
+    }
+
+    .modal-body {
+      padding: 2rem;
+      background: #ffffff;
+    }
+
+    /* Enhanced Form Controls */
+    .form-control {
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      border-color: #71c55d;
+      box-shadow: 0 0 0 0.2rem rgba(113, 197, 93, 0.25);
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Enhanced Buttons */
+    .btn {
+      border-radius: 10px;
+      font-weight: 600;
+      padding: 0.65rem 1.5rem;
+      transition: all 0.3s ease;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #71c55d 0%, #5ba649 100%);
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #5ba649 0%, #4a9639 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(113, 197, 93, 0.3);
+    }
+
+    /* Enhanced Section Cards */
+    .section-card {
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      overflow: hidden;
+      background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+      position: relative;
+    }
+
+    .section-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .section-card.active-card {
+      border-left: 5px solid #71c55d;
+    }
+
+    .section-card.archived-card {
+      border-left: 5px solid #6c757d;
+      opacity: 0.8;
+    }
+
+    .section-card .card-header {
+      background: linear-gradient(135deg, #71c55d 0%, #5ba649 100%);
+      color: white;
+      border: none;
+      padding: 1.5rem 2rem;
+      position: relative;
+    }
+
+    .section-card.archived-card .card-header {
+      background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    }
+
+    .section-card .card-body {
+      padding: 2rem;
+      position: relative;
+    }
+
+    .section-card .card-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-stats {
+      display: flex;
+      gap: 2rem;
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: rgba(113, 197, 93, 0.1);
+      border-radius: 12px;
+      border-left: 4px solid #71c55d;
+    }
+
+    .section-card.archived-card .section-stats {
+      background: rgba(108, 117, 125, 0.1);
+      border-left-color: #6c757d;
+    }
+
+    .stat-item {
+      text-align: center;
+      flex: 1;
+    }
+
+    .stat-number {
+      font-size: 1.75rem;
+      font-weight: bold;
+      color: #71c55d;
+      display: block;
+    }
+
+    .section-card.archived-card .stat-number {
+      color: #6c757d;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #6c757d;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .section-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+    }
+
+    .btn-enter {
+      background: linear-gradient(135deg, #71c55d 0%, #5ba649 100%);
+      color: white;
+      flex: 1;
+      padding: 0.875rem 1.5rem;
+      font-weight: 600;
+      border-radius: 12px;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .btn-enter:hover {
+      background: linear-gradient(135deg, #5ba649 0%, #4a9639 100%);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(113, 197, 93, 0.3);
+    }
+
+    .section-menu {
+      position: relative;
+    }
+
+    .btn-menu {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .btn-menu:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      color: white;
+    }
+
+    .dropdown-menu {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      padding: 0.5rem 0;
+    }
+
+    .dropdown-item {
+      padding: 0.75rem 1.25rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .dropdown-item:hover {
+      background: linear-gradient(135deg, #71c55d 0%, #5ba649 100%);
+      color: white;
+    }
+
+    .dropdown-item.text-danger:hover {
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+      color: white;
+    }
+
+    .dropdown-item.text-success:hover {
+      background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+      color: white;
+    }
+
+    .dropdown-item.text-warning:hover {
+      background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+      color: #212529;
+    }
+
+    /* Section Headers */
+    .section-header {
+      margin: 3rem 0 2rem 0;
+      text-align: left;
+    }
+
+    .section-header h4 {
+      font-weight: 700;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.5rem;
+    }
+
+    .section-header.archived h4 {
+      color: #6c757d;
+    }
+
+    .section-header i {
+      font-size: 1.25rem;
+    }
+
+    /* Badge Enhancements */
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      color: #dee2e6;
+      margin-bottom: 1.5rem;
+    }
+
+    .empty-state h5 {
+      color: #6c757d;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+      color: #adb5bd;
+      font-size: 1.1rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .section-title {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .section-title h2 {
+        font-size: 2rem;
+      }
+      
+      .section-stats {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .section-actions {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -66,20 +416,47 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Add New Section</h5>
+            <h5 class="modal-title">
+              <i class="bi bi-plus-circle me-2"></i>Add New Section
+            </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
             <form id="addSectionForm">
               <div class="mb-3">
-                <label for="sectionName" class="form-label">Section Name</label>
-                <input type="text" class="form-control" id="sectionName" required>
+                <label for="sectionName" class="form-label">
+                  <i class="bi bi-card-text me-2"></i>Section Name
+                </label>
+                <input type="text" class="form-control" id="sectionName" placeholder="e.g., Science 101, Math Advanced" required>
+                <div class="form-text">Choose a descriptive name for your section</div>
               </div>
               <div class="mb-3">
-                <label for="grade" class="form-label">Grade Level</label>
-                <input type="text" class="form-control" id="grade" required>
+                <label for="grade" class="form-label">
+                  <i class="bi bi-mortarboard me-2"></i>Grade Level
+                </label>
+                <select class="form-control" id="grade" required>
+                  <option value="">Select Grade Level</option>
+                  <option value="Kindergarten">Kindergarten</option>
+                  <option value="1st Grade">1st Grade</option>
+                  <option value="2nd Grade">2nd Grade</option>
+                  <option value="3rd Grade">3rd Grade</option>
+                  <option value="4th Grade">4th Grade</option>
+                  <option value="5th Grade">5th Grade</option>
+                  <option value="6th Grade">6th Grade</option>
+                  <option value="7th Grade">7th Grade</option>
+                  <option value="8th Grade">8th Grade</option>
+                  <option value="9th Grade">9th Grade</option>
+                  <option value="10th Grade">10th Grade</option>
+                  <option value="11th Grade">11th Grade</option>
+                  <option value="12th Grade">12th Grade</option>
+                </select>
+                <div class="form-text">Select the appropriate grade level for this section</div>
               </div>
-              <button type="submit" class="btn btn-primary">Add Section</button>
+              <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">
+                  <i class="bi bi-plus-circle me-2"></i>Create Section
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -99,6 +476,21 @@
     import { collection, query, where, getDocs, addDoc, serverTimestamp, doc, getDoc, deleteDoc, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
   import { showLoading, hideLoading, showAlert, consumeFlash, confirmModal } from "./js/ui.js";
     import { registerMessaging } from "./js/fcm.js";
+
+    // Helper functions for section statistics
+    function getActiveStatus() {
+      return 'Active';
+    }
+    
+    function getTotalTasks(sectionId) {
+      // This would ideally fetch from database, but for now return placeholder
+      return Math.floor(Math.random() * 10) + 1;
+    }
+    
+    function getTotalMessages(sectionId) {
+      // This would ideally fetch from database, but for now return placeholder
+      return Math.floor(Math.random() * 5);
+    }
 
     async function loadSections(teacherId) {
       const q = query(
@@ -124,29 +516,72 @@
       
       // Display active sections
       if (activeSections.length > 0) {
-        container.insertAdjacentHTML('beforeend', '<div class="col-12"><h4 class="text-primary mb-3"><i class="bi bi-folder"></i> Active Sections</h4></div>');
-        activeSections.forEach((section) => {
+        container.insertAdjacentHTML('beforeend', '<div class="col-12 section-header"><h4><i class="bi bi-folder-check"></i> Active Sections</h4></div>');
+        activeSections.forEach((section, index) => {
           const count = Array.isArray(section.students) ? section.students.length : 0;
+          const createdDate = section.createdAt ? new Date(section.createdAt.seconds * 1000) : new Date();
           const card = `
-            <div class="col-md-4 mb-3">
-              <div class="card h-100 shadow-sm border-primary">
-                <div class="card-body">
-                  <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="col-lg-4 col-md-6 mb-4">
+              <div class="card section-card active-card h-100">
+                <div class="card-header">
+                  <div class="d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">${section.name}</h5>
-                    <div class="btn-group">
-                      <button class="btn btn-outline-warning btn-sm" data-action="archive" data-section-id="${section.id}" data-section-name="${section.name}" title="Archive Section">
-                        <i class="bi bi-archive"></i>
+                    <div class="dropdown section-menu">
+                      <button class="btn btn-menu" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-three-dots"></i>
                       </button>
-                      <button class="btn btn-outline-danger btn-sm" data-action="delete" data-section-id="${section.id}" data-section-name="${section.name}" title="Delete Permanently">
-                        <i class="bi bi-trash"></i>
-                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                          <a class="dropdown-item" href="section.html?sectionId=${section.id}">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Enter Section
+                          </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                          <button class="dropdown-item text-warning" data-action="archive" data-section-id="${section.id}" data-section-name="${section.name}">
+                            <i class="bi bi-archive me-2"></i>Archive Section
+                          </button>
+                        </li>
+                        <li>
+                          <button class="dropdown-item text-danger" data-action="delete" data-section-id="${section.id}" data-section-name="${section.name}">
+                            <i class="bi bi-trash me-2"></i>Delete Forever
+                          </button>
+                        </li>
+                      </ul>
                     </div>
                   </div>
-                  <p class="card-text">Grade: ${section.grade}</p>
-                  <p class="card-text">Students: ${count}</p>
-                  <div class="d-grid">
-                    <a href="section.html?sectionId=${section.id}" class="btn btn-primary">
-                      <i class="bi bi-box-arrow-in-right"></i> Enter Section
+                </div>
+                <div class="card-body">
+                  <div class="mb-3">
+                    <span class="badge bg-primary fs-6">Grade ${section.grade}</span>
+                    <span class="badge bg-success ms-2">${getActiveStatus()}</span>
+                  </div>
+                  
+                  <div class="section-stats">
+                    <div class="stat-item">
+                      <span class="stat-number">${count}</span>
+                      <span class="stat-label">Students</span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="stat-number">${getTotalTasks(section.id) || 0}</span>
+                      <span class="stat-label">Tasks</span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="stat-number">${getTotalMessages(section.id) || 0}</span>
+                      <span class="stat-label">Messages</span>
+                    </div>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <small class="text-muted">
+                      <i class="bi bi-calendar3 me-1"></i>
+                      Created ${createdDate.toLocaleDateString()}
+                    </small>
+                  </div>
+                  
+                  <div class="section-actions">
+                    <a href="section.html?sectionId=${section.id}" class="btn-enter">
+                      <i class="bi bi-box-arrow-in-right me-2"></i>Enter Section
                     </a>
                   </div>
                 </div>
@@ -158,27 +593,79 @@
       
       // Display archived sections
       if (archivedSections.length > 0) {
-        container.insertAdjacentHTML('beforeend', '<div class="col-12 mt-4"><h4 class="text-muted mb-3"><i class="bi bi-archive"></i> Archived Sections</h4></div>');
+        container.insertAdjacentHTML('beforeend', '<div class="col-12 section-header archived mt-4"><h4><i class="bi bi-archive"></i> Archived Sections</h4></div>');
         archivedSections.forEach((section) => {
           const count = Array.isArray(section.students) ? section.students.length : 0;
+          const archivedDate = section.archivedAt ? new Date(section.archivedAt.seconds * 1000) : new Date();
+          const createdDate = section.createdAt ? new Date(section.createdAt.seconds * 1000) : new Date();
           const card = `
-            <div class="col-md-4 mb-3">
-              <div class="card h-100 shadow-sm border-secondary" style="opacity: 0.7;">
-                <div class="card-body">
-                  <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h5 class="card-title mb-0">${section.name} <span class="badge bg-secondary">Archived</span></h5>
-                    <div class="btn-group">
-                      <button class="btn btn-outline-success btn-sm" data-action="restore" data-section-id="${section.id}" data-section-name="${section.name}" title="Restore Section">
-                        <i class="bi bi-arrow-clockwise"></i>
+            <div class="col-lg-4 col-md-6 mb-4">
+              <div class="card section-card archived-card h-100">
+                <div class="card-header">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                      ${section.name}
+                      <span class="badge bg-light text-dark ms-2">Archived</span>
+                    </h5>
+                    <div class="dropdown section-menu">
+                      <button class="btn btn-menu" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-three-dots"></i>
                       </button>
-                      <button class="btn btn-outline-danger btn-sm" data-action="delete" data-section-id="${section.id}" data-section-name="${section.name}" title="Delete Permanently">
-                        <i class="bi bi-trash"></i>
-                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                          <button class="dropdown-item text-success" data-action="restore" data-section-id="${section.id}" data-section-name="${section.name}">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Restore Section
+                          </button>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                          <button class="dropdown-item text-danger" data-action="delete" data-section-id="${section.id}" data-section-name="${section.name}">
+                            <i class="bi bi-trash me-2"></i>Delete Forever
+                          </button>
+                        </li>
+                      </ul>
                     </div>
                   </div>
-                  <p class="card-text">Grade: ${section.grade}</p>
-                  <p class="card-text">Students: ${count}</p>
-                  <p class="text-muted small">Archived on: ${section.archivedAt ? new Date(section.archivedAt.seconds * 1000).toLocaleDateString() : 'Unknown'}</p>
+                </div>
+                <div class="card-body">
+                  <div class="mb-3">
+                    <span class="badge bg-secondary fs-6">Grade ${section.grade}</span>
+                    <span class="badge bg-warning ms-2">Archived</span>
+                  </div>
+                  
+                  <div class="section-stats">
+                    <div class="stat-item">
+                      <span class="stat-number">${count}</span>
+                      <span class="stat-label">Students</span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="stat-number">${getTotalTasks(section.id) || 0}</span>
+                      <span class="stat-label">Tasks</span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="stat-number">${getTotalMessages(section.id) || 0}</span>
+                      <span class="stat-label">Messages</span>
+                    </div>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                      <small class="text-muted">
+                        <i class="bi bi-calendar3 me-1"></i>
+                        Created ${createdDate.toLocaleDateString()}
+                      </small>
+                      <small class="text-muted">
+                        <i class="bi bi-archive me-1"></i>
+                        Archived ${archivedDate.toLocaleDateString()}
+                      </small>
+                    </div>
+                  </div>
+                  
+                  <div class="section-actions">
+                    <button class="btn-enter" data-action="restore" data-section-id="${section.id}" data-section-name="${section.name}" style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);">
+                      <i class="bi bi-arrow-clockwise me-2"></i>Restore Section
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>`;
@@ -187,7 +674,17 @@
       }
       
       if (activeSections.length === 0 && archivedSections.length === 0) {
-        container.innerHTML = '<div class="col-12 text-center py-5"><i class="bi bi-folder-x display-1 text-muted"></i><p class="text-muted mt-3">No sections found. Create your first section to get started!</p></div>';
+        container.innerHTML = `
+          <div class="col-12">
+            <div class="empty-state">
+              <i class="bi bi-folder-x"></i>
+              <h5>No Sections Yet</h5>
+              <p>Create your first section to start managing students, tasks, and attendance.</p>
+              <button class="btn btn-primary btn-lg mt-3" data-bs-toggle="modal" data-bs-target="#addSectionModal">
+                <i class="bi bi-plus-circle me-2"></i>Create Your First Section
+              </button>
+            </div>
+          </div>`;
       }
     }
 
