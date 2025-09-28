@@ -44,6 +44,18 @@
       font-size: 1.1rem;
     }
 
+    .btn-outline-light {
+      border-color: rgba(255, 255, 255, 0.5);
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .btn-outline-light:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-color: white;
+      color: white;
+    }
+
     .breadcrumb {
       background: transparent;
       padding: 0;
@@ -416,7 +428,14 @@
         
         <div class="row align-items-center">
           <div class="col-lg-8">
-            <h1 id="section-title">Loading Section...</h1>
+            <div class="d-flex align-items-center mb-3">
+              <button class="btn btn-outline-light me-3" id="back-btn" onclick="goBack()">
+                <i class="bi bi-arrow-left me-2"></i>Back
+              </button>
+              <div>
+                <h1 id="section-title" class="mb-0">Loading Section...</h1>
+              </div>
+            </div>
             <p class="subtitle mb-0" id="section-subtitle">Manage student attendance and track participation</p>
           </div>
           <div class="col-lg-4">
@@ -543,6 +562,54 @@
     let students = [];
     let currentSession = null;
     let sessionState = {}; // Store current attendance status for each student
+    let saveTimeout = null; // Debounce auto-save
+    
+    // Go back to previous page
+    function goBack() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const sectionId = urlParams.get('sectionId');
+      
+      if (sectionId) {
+        // Go back to section page if came from there
+        window.location.href = `section.html?sectionId=${sectionId}`;
+      } else {
+        // Otherwise go to dashboard
+        window.location.href = 'dashboard.html';
+      }
+    }
+    
+    // Make goBack function globally available
+    window.goBack = goBack;
+    
+    // Debounced save function
+    function saveAttendanceToDatabase() {
+      if (saveTimeout) {
+        clearTimeout(saveTimeout);
+      }
+      
+      saveTimeout = setTimeout(async () => {
+        if (!currentSession) return;
+        
+        try {
+          const studentAttendance = {};
+          Object.keys(sessionState).forEach(studentId => {
+            studentAttendance[studentId] = {
+              timeInStatus: sessionState[studentId],
+              finalStatus: sessionState[studentId],
+              timestamp: new Date()
+            };
+          });
+          
+          await updateDoc(doc(db, 'attendanceSessions', currentSession.id), {
+            studentAttendance,
+            lastUpdated: serverTimestamp()
+          });
+          
+        } catch (error) {
+          console.error('Error auto-saving attendance:', error);
+        }
+      }, 1000); // Wait 1 second before saving
+    }
 
     // Load students for this section
     async function loadStudents() {
@@ -717,6 +784,11 @@
       const badge = document.getElementById(`status-badge-${studentId}`);
       badge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
       badge.className = `badge ${getStatusBadgeClass(status)}`;
+      
+      // Auto-save to database if session exists
+      if (currentSession) {
+        saveAttendanceToDatabase();
+      }
     };
 
     // Get badge class for status
@@ -1180,7 +1252,18 @@
       if (currentSectionId) {
         try {
           await loadStudents();
-          await checkTodaySession();
+          currentSession = await checkTodaySession();
+          
+          // Load existing attendance data into sessionState if session exists
+          if (currentSession && currentSession.studentAttendance) {
+            sessionState = {};
+            Object.keys(currentSession.studentAttendance).forEach(studentId => {
+              const studentData = currentSession.studentAttendance[studentId];
+              sessionState[studentId] = studentData.finalStatus || studentData.timeInStatus || 'present';
+            });
+            console.log('Loaded existing session state:', sessionState);
+          }
+          
           updateUI();
           await loadAttendanceLogs();
           hideLoading();
