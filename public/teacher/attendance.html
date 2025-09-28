@@ -563,6 +563,7 @@
     let currentSession = null;
     let sessionState = {}; // Store current attendance status for each student
     let saveTimeout = null; // Debounce auto-save
+    let currentSection = null; // Store section data
     
     // Go back to previous page
     function goBack() {
@@ -581,6 +582,41 @@
     // Make goBack function globally available
     window.goBack = goBack;
     
+    // Load section information
+    async function loadSection() {
+      try {
+        const sectionDoc = await getDoc(doc(db, 'sections', currentSectionId));
+        if (sectionDoc.exists()) {
+          currentSection = { id: sectionDoc.id, ...sectionDoc.data() };
+          
+          // Update section title and breadcrumb
+          const sectionTitle = document.getElementById('section-title');
+          const sectionLink = document.getElementById('section-link');
+          
+          if (sectionTitle) {
+            sectionTitle.textContent = `${currentSection.name} - Attendance`;
+          }
+          
+          if (sectionLink) {
+            sectionLink.textContent = currentSection.name;
+            sectionLink.href = `section.html?sectionId=${currentSectionId}`;
+          }
+          
+          console.log('Section loaded:', currentSection.name);
+        } else {
+          throw new Error('Section not found');
+        }
+      } catch (err) {
+        console.error('Error loading section:', err);
+        showAlert(`Error loading section: ${err.message}`, 'danger');
+        // Fallback title
+        const sectionTitle = document.getElementById('section-title');
+        if (sectionTitle) {
+          sectionTitle.textContent = 'Attendance';
+        }
+      }
+    }
+
     // Debounced save function
     function saveAttendanceToDatabase() {
       if (saveTimeout) {
@@ -626,6 +662,18 @@
           students.push(student);
         });
         console.log(`Loaded ${students.length} students`);
+        
+        // Update student count in stats
+        const totalStudentsElement = document.getElementById('total-students');
+        const attendanceStats = document.getElementById('attendance-stats');
+        
+        if (totalStudentsElement) {
+          totalStudentsElement.textContent = students.length;
+        }
+        
+        if (attendanceStats && students.length > 0) {
+          attendanceStats.style.display = 'block';
+        }
         
         // Update UI based on student availability
         updateStudentAvailabilityUI();
@@ -723,15 +771,33 @@
         sessionPanel.style.display = 'block';
         loadCurrentSession();
       } else if (currentSession.status === 'finalized') {
-        // Finalized session
-        statusBanner.className = 'alert alert-success text-center';
-        statusText.textContent = 'Finalized';
-        statusDate.textContent = `Completed: ${new Date(currentSession.endTime.seconds * 1000).toLocaleString()}`;
-        startBtn.style.display = 'inline-block';
-        startBtn.disabled = true;
-        startBtn.innerHTML = '<i class="bi bi-check-circle"></i> Session Complete';
-        finalizeBtn.style.display = 'none';
-        sessionPanel.style.display = 'none';
+        // Finalized session - check if it's from today
+        const sessionDate = currentSession.date;
+        const today = new Date().toISOString().split('T')[0];
+        
+        if (sessionDate === today) {
+          // Today's session is complete
+          statusBanner.className = 'alert alert-success text-center';
+          statusText.textContent = 'Finalized';
+          statusDate.textContent = `Completed: ${new Date(currentSession.endTime.seconds * 1000).toLocaleString()}`;
+          startBtn.style.display = 'inline-block';
+          startBtn.disabled = true;
+          startBtn.innerHTML = '<i class="bi bi-check-circle"></i> Session Complete';
+          finalizeBtn.style.display = 'none';
+          sessionPanel.style.display = 'none';
+        } else {
+          // Old session, allow new session for today
+          statusBanner.className = 'alert alert-info text-center';
+          statusText.textContent = 'No Session';
+          statusDate.textContent = 'Ready to start today\'s attendance';
+          startBtn.style.display = 'inline-block';
+          startBtn.disabled = false;
+          startBtn.innerHTML = '<i class="bi bi-play-circle"></i> Start Attendance (Time In)';
+          finalizeBtn.style.display = 'none';
+          sessionPanel.style.display = 'none';
+          // Clear current session since it's from a different day
+          currentSession = null;
+        }
       }
     }
 
@@ -1251,6 +1317,10 @@
       
       if (currentSectionId) {
         try {
+          // Load section information first
+          await loadSection();
+          
+          // Then load students and sessions
           await loadStudents();
           currentSession = await checkTodaySession();
           
