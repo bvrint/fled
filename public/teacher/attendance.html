@@ -468,7 +468,7 @@
             <div class="alert alert-warning text-center">
               <h5><i class="bi bi-exclamation-triangle"></i> No Students Available</h5>
               <p class="mb-0">You need to add students to this section before you can take attendance.</p>
-              <a href="students.html?sectionId=${currentSectionId}" class="btn btn-primary mt-2">
+              <a href="section.html?sectionId=${currentSectionId}#students" class="btn btn-primary mt-2">
                 <i class="bi bi-person-plus"></i> Add Students
               </a>
             </div>
@@ -771,7 +771,7 @@
         // Update the link in the warning to include current section ID
         const addStudentsLink = noStudentsWarning.querySelector('a');
         if (addStudentsLink && currentSectionId) {
-          addStudentsLink.href = `students.html?sectionId=${currentSectionId}`;
+          addStudentsLink.href = `section.html?sectionId=${currentSectionId}#students`;
         }
       } else {
         // Students available
