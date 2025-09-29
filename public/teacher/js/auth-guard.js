@@ -8,6 +8,7 @@ import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-
 let authCheckTimeout;
 let isAuthenticated = false;
 let authCheckComplete = false;
+let isLoggingOut = false; // Flag to prevent auth failure alerts during logout
 
 // Security: Block page initially until authentication is verified
 document.body.style.display = 'none';
@@ -78,7 +79,9 @@ export function initializeAuthGuard(options = {}) {
       if (!user) {
         console.log('No authenticated user found');
         forceLoginRedirect('No user authenticated');
-        onAuthFailure('No user authenticated');
+        if (!isLoggingOut) {
+          onAuthFailure('No user authenticated');
+        }
         return;
       }
 
@@ -90,7 +93,9 @@ export function initializeAuthGuard(options = {}) {
         console.log('User document not found');
         await signOut(auth);
         forceLoginRedirect('User account not found');
-        onAuthFailure('User account not found');
+        if (!isLoggingOut) {
+          onAuthFailure('User account not found');
+        }
         return;
       }
 
@@ -101,7 +106,9 @@ export function initializeAuthGuard(options = {}) {
         console.log(`User role mismatch. Expected: ${requiredRole}, Got: ${userData.role}`);
         await signOut(auth);
         forceLoginRedirect('Insufficient permissions');
-        onAuthFailure('Insufficient permissions');
+        if (!isLoggingOut) {
+          onAuthFailure('Insufficient permissions');
+        }
         return;
       }
 
@@ -110,7 +117,9 @@ export function initializeAuthGuard(options = {}) {
         console.log('User account is disabled');
         await signOut(auth);
         forceLoginRedirect('Account disabled');
-        onAuthFailure('Account disabled');
+        if (!isLoggingOut) {
+          onAuthFailure('Account disabled');
+        }
         return;
       }
 
@@ -135,7 +144,9 @@ export function initializeAuthGuard(options = {}) {
       }
 
       forceLoginRedirect('Authentication error');
-      onAuthFailure(error.message);
+      if (!isLoggingOut) {
+        onAuthFailure(error.message);
+      }
     }
   });
 
@@ -171,6 +182,9 @@ export function initializeAuthGuard(options = {}) {
 export async function secureLogout() {
   try {
     console.log('Performing secure logout...');
+    
+    // Set logout flag to prevent auth failure alerts
+    isLoggingOut = true;
     
     // Clear authentication flag
     isAuthenticated = false;

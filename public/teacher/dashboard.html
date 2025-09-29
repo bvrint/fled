@@ -885,7 +885,9 @@
       },
       onAuthFailure: (reason) => {
         hideLoading();
-        showAlert(`Authentication failed: ${reason}`, 'danger');
+        // Only show authentication failure if it's not a logout scenario
+        console.log('Authentication failure detected:', reason);
+        showAlert(`Authentication failed: ${reason}`, 'danger', 6000);
       }
     });
 
@@ -895,7 +897,17 @@
       const ok = await confirmModal('Sign out', 'Are you sure you want to log out?', { confirmText: 'Log out', cancelText: 'Stay', variant: 'danger' });
       if (!ok) return;
       showLoading('Signing out…');
-      await secureLogout();
+      try {
+        await secureLogout();
+      } catch (error) {
+        console.error('Logout error:', error);
+        hideLoading();
+        showAlert('Logout completed. Redirecting...', 'info', 2000);
+        // Force redirect after 2 seconds even if there's an error
+        setTimeout(() => {
+          window.location.replace('login.html');
+        }, 2000);
+      }
     });
   </script>
   <footer id="footer" class="footer light-background">
