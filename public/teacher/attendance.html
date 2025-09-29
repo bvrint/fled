@@ -1393,7 +1393,8 @@
       },
       onAuthFailure: (reason) => {
         hideLoading();
-        showAlert(`Authentication failed: ${reason}`, 'danger');
+        console.log('Authentication failure detected:', reason);
+        showAlert(`Authentication failed: ${reason}`, 'danger', 6000);
       }
     });
 

@@ -77,7 +77,7 @@ export function initializeAuthGuard(options = {}) {
 
       // No user authenticated
       if (!user) {
-        console.log('No authenticated user found');
+        console.log('No authenticated user found. IsLoggingOut:', isLoggingOut);
         forceLoginRedirect('No user authenticated');
         if (!isLoggingOut) {
           onAuthFailure('No user authenticated');
@@ -152,7 +152,7 @@ export function initializeAuthGuard(options = {}) {
 
   // Monitor token changes for logout detection
   auth.onIdTokenChanged((user) => {
-    if (isAuthenticated && !user) {
+    if (isAuthenticated && !user && !isLoggingOut) {
       console.log('User token changed - user signed out elsewhere');
       forceLoginRedirect('Signed out elsewhere');
     }
@@ -186,7 +186,7 @@ export async function secureLogout() {
     // Set logout flag to prevent auth failure alerts
     isLoggingOut = true;
     
-    // Clear authentication flag
+    // Clear authentication flag first
     isAuthenticated = false;
     
     // Clear all local storage
@@ -195,6 +195,9 @@ export async function secureLogout() {
     // Sign out from Firebase
     await signOut(auth);
     
+    // Small delay to ensure auth state change is processed
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     // Force redirect to login
     window.location.replace('login.html');
     
@@ -202,6 +205,7 @@ export async function secureLogout() {
     console.error('Logout error:', error);
     // Force redirect even if signout fails
     clearAuthState();
+    isLoggingOut = false; // Reset flag on error
     window.location.replace('login.html');
   }
 }
