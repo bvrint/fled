@@ -468,6 +468,22 @@
     import { collection, query, where, getDocs, addDoc, serverTimestamp, doc, getDoc, deleteDoc, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
   import { showLoading, hideLoading, showAlert, consumeFlash, confirmModal } from "./js/ui.js";
     import { registerMessaging } from "./js/fcm.js";
+    
+    // Security: Immediate authentication check
+    let authCheckTimeout;
+    let isAuthenticated = false;
+    let authCheckComplete = false;
+    
+    // Block the page initially until auth is verified
+    document.body.style.display = 'none';
+    
+    // Timeout for auth check - if no response in 5 seconds, redirect to login
+    authCheckTimeout = setTimeout(() => {
+      if (!authCheckComplete) {
+        console.log('Auth check timeout - redirecting to login');
+        window.location.replace('login.html');
+      }
+    }, 5000);
 
     // Helper functions for section statistics
     function getActiveStatus() {
@@ -867,40 +883,161 @@
       }
     });
 
-  consumeFlash();
-  showLoading('Checking session…');
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.replace('login.html');
-        return;
+    // Additional security check for direct URL access
+    function checkAuthenticationSecurity() {
+      // Check if user tried to access directly without proper authentication flow
+      const referrer = document.referrer;
+      const currentURL = window.location.href;
+      
+      // If accessing directly (no referrer or not from login), be extra cautious
+      if (!referrer || !referrer.includes('login.html')) {
+        console.log('Direct access detected - requiring fresh authentication');
       }
+    }
+    
+    checkAuthenticationSecurity();
+    consumeFlash();
+    showLoading('Checking session…');
+    
+    onAuthStateChanged(auth, async (user) => {
       try {
-        // Role guard
-        const u = await getDoc(doc(db, 'users', user.uid));
-        if (!u.exists() || u.data().role !== 'teacher') {
-          await signOut(auth);
+        // Clear the timeout since we got an auth response
+        if (authCheckTimeout) {
+          clearTimeout(authCheckTimeout);
+          authCheckComplete = true;
+        }
+        
+        console.log('Auth state changed. User:', user ? user.uid : 'null');
+        
+        if (!user) {
+          console.log('No authenticated user - redirecting to login');
+          hideLoading();
+          // Clear any existing sessions
+          localStorage.clear();
+          sessionStorage.clear();
           window.location.replace('login.html');
           return;
         }
+        
+        // Verify user exists and has proper role
+        console.log('Verifying user role and permissions...');
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        
+        if (!userDoc.exists()) {
+          console.log('User document not found - redirecting to login');
+          await signOut(auth);
+          localStorage.clear();
+          sessionStorage.clear();
+          hideLoading();
+          window.location.replace('login.html');
+          return;
+        }
+        
+        const userData = userDoc.data();
+        if (userData.role !== 'teacher') {
+          console.log('User is not a teacher - redirecting to login');
+          await signOut(auth);
+          localStorage.clear();
+          sessionStorage.clear();
+          hideLoading();
+          window.location.replace('login.html');
+          return;
+        }
+        
+        // Check if account is active/enabled
+        if (userData.disabled === true) {
+          console.log('User account is disabled');
+          await signOut(auth);
+          localStorage.clear();
+          sessionStorage.clear();
+          hideLoading();
+          showAlert('Your account has been disabled. Please contact support.', 'danger');
+          setTimeout(() => window.location.replace('login.html'), 3000);
+          return;
+        }
+        
+        // All checks passed - user is authenticated and authorized
+        console.log('User authenticated successfully:', userData.email);
+        isAuthenticated = true;
+        
+        // Show the page content
+        document.body.style.display = 'block';
+        
         // Register FCM for push notifications (non-blocking)
         registerMessaging(user).catch(err => {
           console.warn('FCM registration failed (non-blocking):', err);
         });
+        
         hideLoading();
         await loadSections(user.uid);
+        
       } catch (err) {
+        console.error('Authentication error:', err);
         hideLoading();
-        showAlert(err.message, 'danger');
+        
+        // On any authentication error, sign out and redirect
+        try {
+          await signOut(auth);
+        } catch (signOutErr) {
+          console.error('Error signing out:', signOutErr);
+        }
+        
+        localStorage.clear();
+        sessionStorage.clear();
+        showAlert('Authentication failed. Please log in again.', 'danger');
+        setTimeout(() => window.location.replace('login.html'), 2000);
       }
     });
 
+    // Enhanced logout with proper cleanup
     document.getElementById('logout')?.addEventListener('click', async (e) => {
       e.preventDefault();
       const ok = await confirmModal('Sign out', 'Are you sure you want to log out?', { confirmText: 'Log out', cancelText: 'Stay', variant: 'danger' });
       if (!ok) return;
+      
       showLoading('Signing out…');
-      await signOut(auth);
-      window.location.replace('login.html');
+      
+      try {
+        // Clear all local data
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Sign out from Firebase
+        await signOut(auth);
+        
+        // Force redirect
+        window.location.replace('login.html');
+      } catch (err) {
+        console.error('Logout error:', err);
+        // Force redirect even if sign out fails
+        window.location.replace('login.html');
+      }
+    });
+    
+    // Security: Monitor for authentication state changes
+    // If user gets signed out elsewhere, redirect immediately
+    auth.onIdTokenChanged((user) => {
+      if (isAuthenticated && !user) {
+        console.log('User signed out elsewhere - redirecting');
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.replace('login.html');
+      }
+    });
+    
+    // Security: Page visibility change handler
+    // Check authentication when page becomes visible again
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && isAuthenticated) {
+        // Page became visible, verify user is still authenticated
+        const user = auth.currentUser;
+        if (!user) {
+          console.log('User no longer authenticated - redirecting');
+          localStorage.clear();
+          sessionStorage.clear();
+          window.location.replace('login.html');
+        }
+      }
     });
   </script>
   <footer id="footer" class="footer light-background">

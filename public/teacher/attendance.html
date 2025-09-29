@@ -552,7 +552,7 @@
   <!-- Firebase SDK + UI helpers -->
   <script type="module">
     import { auth, db } from "./js/firebase.js";
-    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { initializeAuthGuard, secureLogout } from "./js/auth-guard.js";
     import { collection, query, where, getDocs, addDoc, doc, getDoc, updateDoc, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
     import { showLoading, hideLoading, showAlert, confirmModal } from "./js/ui.js";
     import { registerMessaging } from "./js/fcm.js";
@@ -1337,86 +1337,73 @@
     document.getElementById('startAttendanceBtn').addEventListener('click', startAttendanceSession);
     document.getElementById('finalizeAttendanceBtn').addEventListener('click', finalizeAttendanceSession);
 
-    // Initialize app
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.replace('login.html');
-        return;
-      }
-      
-      showLoading('Initializing attendance page...');
-      
-      try {
-        const u = await getDoc(doc(db, 'users', user.uid));
-        if (!u.exists() || u.data().role !== 'teacher') {
-          await signOut(auth);
-          window.location.replace('login.html');
-          return;
-        }
-      } catch (err) {
-        console.error('User verification error:', err);
-        hideLoading();
-        showAlert(`Authentication error: ${err.message}`, 'danger');
-        await signOut(auth);
-        window.location.replace('login.html');
-        return;
-      }
-      
-      currentUserUid = user.uid;
-      console.log('User authenticated:', currentUserUid);
-      
-      // Register FCM in background (non-blocking)
-      registerMessaging(user).catch(err => {
-        console.warn('FCM registration failed (non-blocking):', err);
-      });
-      
-      const urlParams = new URLSearchParams(window.location.search);
-      currentSectionId = urlParams.get('sectionId');
-      console.log('Section ID:', currentSectionId);
-      
-      if (currentSectionId) {
-        try {
-          // Load section information first
-          await loadSection();
-          
-          // Then load students and sessions
-          await loadStudents();
-          currentSession = await checkTodaySession();
-          
-          // Load existing attendance data into sessionState if session exists
-          if (currentSession && currentSession.studentAttendance) {
-            sessionState = {};
-            Object.keys(currentSession.studentAttendance).forEach(studentId => {
-              const studentData = currentSession.studentAttendance[studentId];
-              sessionState[studentId] = studentData.finalStatus || studentData.timeInStatus || 'present';
-            });
-            console.log('Loaded existing session state:', sessionState);
+    // Initialize secure authentication
+    initializeAuthGuard({
+      requiredRole: 'teacher',
+      timeout: 5000,
+      onAuthSuccess: async (user, userData) => {
+        showLoading('Initializing attendance page...');
+        
+        currentUserUid = user.uid;
+        console.log('User authenticated:', currentUserUid);
+        
+        // Register FCM in background (non-blocking)
+        registerMessaging(user).catch(err => {
+          console.warn('FCM registration failed (non-blocking):', err);
+        });
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        currentSectionId = urlParams.get('sectionId');
+        console.log('Section ID:', currentSectionId);
+        
+        if (currentSectionId) {
+          try {
+            // Load section information first
+            await loadSection();
+            
+            // Then load students and sessions
+            await loadStudents();
+            currentSession = await checkTodaySession();
+            
+            // Load existing attendance data into sessionState if session exists
+            if (currentSession && currentSession.studentAttendance) {
+              sessionState = {};
+              Object.keys(currentSession.studentAttendance).forEach(studentId => {
+                const studentData = currentSession.studentAttendance[studentId];
+                sessionState[studentId] = studentData.finalStatus || studentData.timeInStatus || 'present';
+              });
+              console.log('Loaded existing session state:', sessionState);
+            }
+            
+            updateUI();
+            await loadAttendanceLogs();
+            hideLoading();
+            console.log('Attendance page ready');
+          } catch (err) {
+            hideLoading();
+            showAlert(`Failed to initialize: ${err.message}`, 'danger');
           }
-          
-          updateUI();
-          await loadAttendanceLogs();
+        } else {
           hideLoading();
-          console.log('Attendance page ready');
-        } catch (err) {
-          hideLoading();
-          showAlert(`Failed to initialize: ${err.message}`, 'danger');
+          showAlert('No section selected. Redirecting to dashboard.', 'info');
+          setTimeout(() => {
+            window.location.replace('dashboard.html');
+          }, 2000);
         }
-      } else {
+      },
+      onAuthFailure: (reason) => {
         hideLoading();
-        showAlert('No section selected. Redirecting to dashboard.', 'info');
-        setTimeout(() => {
-          window.location.replace('dashboard.html');
-        }, 2000);
+        showAlert(`Authentication failed: ${reason}`, 'danger');
       }
     });
 
+    // Secure logout handler
     document.getElementById('logout').addEventListener('click', async (e) => {
       e.preventDefault();
       const ok = await confirmModal('Sign out', 'Are you sure you want to log out?', { confirmText: 'Log out', cancelText: 'Stay', variant: 'danger' });
       if (!ok) return;
       showLoading('Signing out…');
-      await signOut(auth);
-      window.location.replace('login.html');
+      await secureLogout();
     });
   </script>
 
