@@ -130,13 +130,9 @@
   <!-- Firebase SDK + UI helpers -->
   <script type="module">
     import { auth, db } from "./js/firebase.js";
-    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-    import { loadTasks as fetchTasks, addTask as createTask, deleteTask as removeTask } from "./js/tasks.js";
-  import { showLoading, hideLoading, showAlert, confirmModal } from "./js/ui.js";
-    import { registerMessaging } from "./js/fcm.js";
-
-    let currentSectionId = null;
+    import { initializeAuthGuard, secureLogout } from "./js/auth-guard.js";
+    import { collection, query, where, getDocs, addDoc, doc, getDoc, updateDoc, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { showLoading, hideLoading, showAlert, confirmModal } from "./js/ui.js";    let currentSectionId = null;
     const tbody = document.querySelector('#tasksTable tbody');
 
     function renderTasks(tasks) {

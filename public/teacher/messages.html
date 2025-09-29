@@ -3,7 +3,11 @@
 
 <head>
   <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="width=device-width, initi  <script type="module">
+    import { auth, db } from "./js/firebase.js";
+    import { initializeAuthGuard, secureLogout } from "./js/auth-guard.js";
+    import { collection, query, where, getDocs, addDoc, doc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { showLoading, hideLoading, showAlert, confirmModal } from "./js/ui.js";ale=1.0" name="viewport">
   <title>FLED - Messages</title>
 
   <!-- Favicons -->
