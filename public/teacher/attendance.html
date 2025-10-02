@@ -1209,7 +1209,13 @@
         displayAttendanceLogs(logs);
       } catch (err) {
         console.error('Error loading logs:', err);
-        showAlert(`Error loading logs: ${err.message}`, 'danger');
+        console.error('Error details:', {
+          message: err.message,
+          stack: err.stack,
+          currentSectionId,
+          currentUserUid
+        });
+        showAlert(`Error loading attendance logs: ${err.message}`, 'danger');
       }
     }
 
@@ -1217,6 +1223,15 @@
     function displayAttendanceLogs(logs) {
       const container = document.getElementById('attendanceLogsContainer');
       const noLogsMessage = document.getElementById('noLogsMessage');
+      
+      // Check if elements exist
+      if (!container || !noLogsMessage) {
+        console.error('Required DOM elements not found:', {
+          container: !!container,
+          noLogsMessage: !!noLogsMessage
+        });
+        return;
+      }
       
       if (logs.length === 0) {
         noLogsMessage.style.display = 'block';

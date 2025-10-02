@@ -518,10 +518,10 @@
                   <div class="d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">${section.name}</h5>
                     <div class="section-actions-header d-flex gap-2">
-                      <button type="button" class="btn btn-sm btn-warning" onclick="archiveSection('${section.id}', '${section.name}')" title="Archive Section">
+                      <button type="button" class="btn btn-sm btn-warning" data-action="archive" data-section-id="${section.id}" data-section-name="${section.name.replace(/"/g, '&quot;')}" title="Archive Section">
                         <i class="bi bi-archive"></i>
                       </button>
-                      <button type="button" class="btn btn-sm btn-danger" onclick="deleteSection('${section.id}', '${section.name}')" title="Delete Forever">
+                      <button type="button" class="btn btn-sm btn-danger" data-action="delete" data-section-id="${section.id}" data-section-name="${section.name.replace(/"/g, '&quot;')}" title="Delete Forever">
                         <i class="bi bi-trash"></i>
                       </button>
                     </div>
@@ -576,10 +576,10 @@
                       <span class="badge bg-light text-dark ms-2">Archived</span>
                     </h5>
                     <div class="section-actions-header d-flex gap-2">
-                      <button type="button" class="btn btn-sm btn-success" onclick="restoreSection('${section.id}', '${section.name}')" title="Restore Section">
+                      <button type="button" class="btn btn-sm btn-success" data-action="restore" data-section-id="${section.id}" data-section-name="${section.name.replace(/"/g, '&quot;')}" title="Restore Section">
                         <i class="bi bi-arrow-clockwise"></i>
                       </button>
-                      <button type="button" class="btn btn-sm btn-danger" onclick="deleteSection('${section.id}', '${section.name}')" title="Delete Forever">
+                      <button type="button" class="btn btn-sm btn-danger" data-action="delete" data-section-id="${section.id}" data-section-name="${section.name.replace(/"/g, '&quot;')}" title="Delete Forever">
                         <i class="bi bi-trash"></i>
                       </button>
                     </div>
@@ -637,13 +637,6 @@
           </div>`;
       }
     }
-
-
-
-    // Make functions globally available for onclick handlers
-    window.archiveSection = archiveSection;
-    window.restoreSection = restoreSection;
-    window.deleteSection = deleteSection;
 
     // Archive section function
     async function archiveSection(sectionId, sectionName) {
@@ -717,6 +710,9 @@
           console.log('User cancelled deletion');
           return;
         }
+        
+        // Add delay to ensure first modal is completely closed
+        await new Promise(resolve => setTimeout(resolve, 300));
         
         // Double confirmation for permanent deletion
         const doubleConfirmed = await confirmModal(
@@ -839,6 +835,35 @@
         hideLoading();
       }
     }
+
+    // Make functions globally available for onclick handlers
+    window.archiveSection = archiveSection;
+    window.restoreSection = restoreSection;
+    window.deleteSection = deleteSection;
+
+    // Add event listeners for section action buttons
+    document.addEventListener('click', function(e) {
+      const button = e.target.closest('button[data-action]');
+      if (!button) return;
+      
+      const action = button.dataset.action;
+      const sectionId = button.dataset.sectionId;
+      const sectionName = button.dataset.sectionName;
+      
+      e.preventDefault();
+      
+      switch(action) {
+        case 'delete':
+          deleteSection(sectionId, sectionName);
+          break;
+        case 'archive':
+          archiveSection(sectionId, sectionName);
+          break;
+        case 'restore':
+          restoreSection(sectionId, sectionName);
+          break;
+      }
+    });
 
     document.getElementById('addSectionForm').addEventListener('submit', async (e) => {
       e.preventDefault();
