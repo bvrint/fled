@@ -695,15 +695,75 @@
       }
     }
     
+    // Custom modal confirmation function that actually works
+    function createWorkingConfirmModal(title, message, confirmText = 'OK', cancelText = 'Cancel', variant = 'danger') {
+      return new Promise((resolve) => {
+        // Remove any existing modal
+        const existingModal = document.getElementById('working-confirm-modal');
+        if (existingModal) {
+          existingModal.remove();
+        }
+
+        // Create modal HTML
+        const modalHtml = `
+          <div class="modal fade" id="working-confirm-modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">${title}</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <p class="mb-0" style="white-space: pre-line;">${message}</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="modal-cancel">${cancelText}</button>
+                  <button type="button" class="btn btn-${variant}" id="modal-confirm">${confirmText}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Add modal to DOM
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        const modalElement = document.getElementById('working-confirm-modal');
+        const modal = new bootstrap.Modal(modalElement, { backdrop: 'static', keyboard: false });
+        
+        // Handle confirm button
+        document.getElementById('modal-confirm').addEventListener('click', () => {
+          modal.hide();
+          modalElement.remove();
+          resolve(true);
+        });
+        
+        // Handle cancel button and modal close
+        const handleCancel = () => {
+          modal.hide();
+          modalElement.remove();
+          resolve(false);
+        };
+        
+        document.getElementById('modal-cancel').addEventListener('click', handleCancel);
+        modalElement.addEventListener('hidden.bs.modal', handleCancel);
+        
+        // Show modal
+        modal.show();
+      });
+    }
+
     // Delete section and all related data
     async function deleteSection(sectionId, sectionName) {
       try {
         console.log('Delete function called for:', sectionId, sectionName);
         
-        const confirmed = await confirmModal(
+        const confirmed = await createWorkingConfirmModal(
           'Delete Section Forever', 
           `Are you sure you want to permanently delete "${sectionName}" and ALL its data?\n\nThis will delete:\n• All students\n• All attendance records\n• All tasks\n• All messages\n\nThis action CANNOT be undone!`,
-          { confirmText: 'Delete Forever', cancelText: 'Cancel', variant: 'danger' }
+          'Delete Forever',
+          'Cancel',
+          'danger'
         );
         
         if (!confirmed) {
@@ -711,25 +771,35 @@
           return;
         }
         
+        console.log('First confirmation passed, showing second confirmation...');
+        
         // Add delay to ensure first modal is completely closed
         await new Promise(resolve => setTimeout(resolve, 300));
         
         // Double confirmation for permanent deletion
-        const doubleConfirmed = await confirmModal(
+        const doubleConfirmed = await createWorkingConfirmModal(
           'FINAL WARNING!', 
           `You are about to permanently delete "${sectionName}" and ALL its data.\n\nThis is your final chance to cancel. Are you absolutely sure?`,
-          { confirmText: 'Yes, Delete Everything', cancelText: 'Cancel', variant: 'danger' }
+          'Yes, Delete Everything',
+          'Cancel',
+          'danger'
         );
+        
+        console.log('Second confirmation result:', doubleConfirmed);
         
         if (!doubleConfirmed) {
           console.log('User cancelled double confirmation');
           return;
         }
         
+        console.log('Both confirmations passed, proceeding with deletion...');
+        console.log('Both confirmations passed, proceeding with deletion...');
+        
         showLoading('Deleting section and all related data...');
         console.log('Starting deletion process for section:', sectionId);
         
         const userId = auth.currentUser.uid;
+        console.log('Current user ID:', userId);
         let deletedCounts = { students: 0, attendance: 0, sessions: 0, tasks: 0, messages: 0, parents: 0 };
         
         try {
@@ -744,9 +814,11 @@
           console.log('Found', studentsSnapshot.size, 'students to delete');
           
           for (const studentDoc of studentsSnapshot.docs) {
+            console.log('Deleting student:', studentDoc.id);
             await deleteDoc(studentDoc.ref);
             deletedCounts.students++;
           }
+          console.log('Students deleted:', deletedCounts.students);
           
           // Delete attendance records
           console.log('Deleting attendance records...');
@@ -759,9 +831,11 @@
           console.log('Found', attendanceSnapshot.size, 'attendance records to delete');
           
           for (const attendanceDoc of attendanceSnapshot.docs) {
+            console.log('Deleting attendance record:', attendanceDoc.id);
             await deleteDoc(attendanceDoc.ref);
             deletedCounts.attendance++;
           }
+          console.log('Attendance records deleted:', deletedCounts.attendance);
           
           // Delete attendance sessions
           console.log('Deleting attendance sessions...');
@@ -774,9 +848,11 @@
           console.log('Found', sessionsSnapshot.size, 'attendance sessions to delete');
           
           for (const sessionDoc of sessionsSnapshot.docs) {
+            console.log('Deleting attendance session:', sessionDoc.id);
             await deleteDoc(sessionDoc.ref);
             deletedCounts.sessions++;
           }
+          console.log('Attendance sessions deleted:', deletedCounts.sessions);
           
           // Delete tasks
           console.log('Deleting tasks...');
@@ -789,9 +865,11 @@
           console.log('Found', tasksSnapshot.size, 'tasks to delete');
           
           for (const taskDoc of tasksSnapshot.docs) {
+            console.log('Deleting task:', taskDoc.id);
             await deleteDoc(taskDoc.ref);
             deletedCounts.tasks++;
           }
+          console.log('Tasks deleted:', deletedCounts.tasks);
           
           // Delete messages
           console.log('Deleting messages...');
@@ -804,35 +882,41 @@
           console.log('Found', messagesSnapshot.size, 'messages to delete');
           
           for (const messageDoc of messagesSnapshot.docs) {
+            console.log('Deleting message:', messageDoc.id);
             await deleteDoc(messageDoc.ref);
             deletedCounts.messages++;
           }
+          console.log('Messages deleted:', deletedCounts.messages);
           
           // Finally, delete the section itself
-          console.log('Deleting section...');
+          console.log('Deleting section document...');
           await deleteDoc(doc(db, 'sections', sectionId));
+          console.log('Section document deleted successfully');
           
           console.log('All deletions completed successfully');
+          console.log('Final deletion counts:', deletedCounts);
+          
+          hideLoading();
           await loadSections(userId);
           
           showAlert(
-            `Section "${sectionName}" and all related data has been permanently deleted:\\n\\n` +
-            `• ${deletedCounts.students} students\\n` +
-            `• ${deletedCounts.attendance} attendance records\\n` +
-            `• ${deletedCounts.sessions} attendance sessions\\n` +
-            `• ${deletedCounts.tasks} tasks\\n` +
+            `Section "${sectionName}" and all related data has been permanently deleted:\n\n` +
+            `• ${deletedCounts.students} students\n` +
+            `• ${deletedCounts.attendance} attendance records\n` +
+            `• ${deletedCounts.sessions} attendance sessions\n` +
+            `• ${deletedCounts.tasks} tasks\n` +
             `• ${deletedCounts.messages} messages`,
             'success'
           );
         } catch (deleteError) {
           console.error('Error during deletion process:', deleteError);
+          hideLoading();
           throw deleteError;
         }
       } catch (err) {
         console.error('Error deleting section:', err);
-        showAlert(`Error deleting section: ${err.message}`, 'danger');
-      } finally {
         hideLoading();
+        showAlert(`Error deleting section: ${err.message}`, 'danger');
       }
     }
 
