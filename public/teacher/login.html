@@ -259,11 +259,15 @@
   <!-- Firebase SDK + (your page logic can remain as module) -->
   <script type="module">
     import { auth, db } from "./js/firebase.js";
-    import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendPasswordResetEmail, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
     import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-functions.js";
     import { ensureContainers, showLoading, hideLoading, showAlert, flash } from "./js/ui.js";
 
     ensureContainers();
+
+    const functions = getFunctions();
+    const promoteVerifiedTeachers = httpsCallable(functions, 'promoteVerifiedTeachers');
 
     const loginForm = document.getElementById('loginForm');
     const signupForm = document.getElementById('signupForm');
@@ -300,13 +304,30 @@
         const password = document.getElementById('password').value;
         showLoading('Signing in…');
         const { user } = await signInWithEmailAndPassword(auth, email, password);
+        
+        // Check if email is verified
+        if (!user.emailVerified) {
+          await signOut(auth);
+          hideLoading();
+          showAlert('Please verify your email before logging in. Check your inbox for the verification link.', 'warning');
+          btn && (btn.disabled = false);
+          return;
+        }
+        
+        // Try to promote user to teacher role if email is verified
+        try {
+          await promoteVerifiedTeachers();
+        } catch (err) {
+          console.log('Could not promote user:', err.message);
+        }
+        
         const role = await fetchRoleWithRetry(user.uid, 5, 300);
         if (role === 'teacher') {
           hideLoading();
           window.location.replace('dashboard.html');
         } else {
           hideLoading();
-          showAlert('Access denied. Only teachers can log in.', 'danger');
+          showAlert('Access denied. Your account is pending approval. Please try again later.', 'warning');
           await signOut(auth);
         }
       } catch (err) {
@@ -330,10 +351,23 @@
         showLoading('Creating your account…');
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         if (name) await updateProfile(cred.user, { displayName: name });
-        await setDoc(doc(db, 'users', cred.user.uid), { uid: cred.user.uid, email, name, role: 'teacher', createdAt: serverTimestamp() }, { merge: true });
+        
+        // Send email verification
+        await sendEmailVerification(cred.user);
+        
+        // Set role as 'pending' until email is verified
+        await setDoc(doc(db, 'users', cred.user.uid), { 
+          uid: cred.user.uid, 
+          email, 
+          name, 
+          role: 'pending', 
+          verified: false, 
+          createdAt: serverTimestamp() 
+        }, { merge: true });
+        
         try { await signOut(auth); } catch {}
         hideLoading();
-        flash('Your account was created. Please log in.', 'success', { kind: 'registered' });
+        flash('Verification email sent! Please check your inbox and verify your email before logging in.', 'success', { kind: 'registered' });
         window.location.replace('login.html');
       } catch (err) {
         hideLoading();

@@ -4,6 +4,7 @@
 
 const {onDocumentCreated} = require("firebase-functions/v2/firestore");
 const {setGlobalOptions} = require("firebase-functions/v2/options");
+const {onCall} = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 
 // Configure defaults
@@ -16,6 +17,59 @@ try {
 
 const db = admin.firestore();
 const messaging = admin.messaging();
+
+/**
+ * Cloud Function: Promote verified users to 'teacher' role
+ * This function can be called after email verification or scheduled to run periodically
+ */
+exports.promoteVerifiedTeachers = onCall(async (request) => {
+	// Only allow authenticated users to call this
+	if (!request.auth) {
+		throw new Error('Unauthorized - must be signed in');
+	}
+
+	const uid = request.auth.uid;
+	
+	try {
+		// Get the user's auth record
+		const userRecord = await admin.auth().getUser(uid);
+		
+		// Check if email is verified
+		if (!userRecord.emailVerified) {
+			return { success: false, message: 'Email not verified yet' };
+		}
+		
+		// Get the user's Firestore document
+		const userDoc = await db.collection('users').doc(uid).get();
+		
+		if (!userDoc.exists) {
+			return { success: false, message: 'User document not found' };
+		}
+		
+		const userData = userDoc.data();
+		
+		// If already a teacher, no need to update
+		if (userData.role === 'teacher') {
+			return { success: true, message: 'Already a verified teacher' };
+		}
+		
+		// Update role to teacher and mark as verified
+		await db.collection('users').doc(uid).update({
+			role: 'teacher',
+			verified: true,
+			verifiedAt: admin.firestore.FieldValue.serverTimestamp()
+		});
+		
+		return { 
+			success: true, 
+			message: 'Successfully promoted to teacher role',
+			role: 'teacher'
+		};
+	} catch (error) {
+		console.error('Error promoting user:', error);
+		throw new Error(`Failed to promote user: ${error.message}`);
+	}
+});
 
 /**
  * Helper: normalize tokens from a parent document.

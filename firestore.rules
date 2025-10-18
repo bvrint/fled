@@ -6,71 +6,81 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Users: a teacher can read their own user doc and update limited fields
+    function isEmailVerified() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isVerifiedTeacher() {
+      return isEmailVerified() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+    }
+
+    // Users: anyone can create their user doc, but only verified teachers can fully use the system
     match /users/{userId} {
       allow read: if isSignedIn() && request.auth.uid == userId;
-      allow update: if isSignedIn() && request.auth.uid == userId;
       allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && request.auth.uid == userId;
     }
 
     // Sections owned by teacher (store ownerUid on section doc)
     match /sections/{sectionId} {
-      // Only allow teachers to read their own sections
-      allow read: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+      // Only allow verified teachers to read their own sections
+      allow read: if isVerifiedTeacher() && resource.data.ownerUid == request.auth.uid;
       // Create must set ownerUid to the authenticated user
-      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow create: if isVerifiedTeacher() && request.resource.data.ownerUid == request.auth.uid;
       // Update/Delete only by owner
-      allow update, delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if isVerifiedTeacher() && resource.data.ownerUid == request.auth.uid;
     }
 
     // Students under a section (store sectionId and ownerUid on student docs)
     match /students/{studentId} {
-      allow read: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
-      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
-      allow update, delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+      allow read: if isVerifiedTeacher() && resource.data.ownerUid == request.auth.uid;
+      allow create: if isVerifiedTeacher() && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if isVerifiedTeacher() && resource.data.ownerUid == request.auth.uid;
     }
 
     // Parents created by the teacher as contacts (store ownerUid)
     match /parents/{parentId} {
-      allow read: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
-      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
-      allow update, delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+      allow read: if isVerifiedTeacher() && resource.data.ownerUid == request.auth.uid;
+      allow create: if isVerifiedTeacher() && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if isVerifiedTeacher() && resource.data.ownerUid == request.auth.uid;
     }
 
     // Attendance (store sectionId, studentId, ownerUid)
     match /attendance/{attId} {
-      allow read: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
-      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
-      allow update, delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+      allow read: if isVerifiedTeacher() && resource.data.ownerUid == request.auth.uid;
+      allow create: if isVerifiedTeacher() && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if isVerifiedTeacher() && resource.data.ownerUid == request.auth.uid;
     }
 
     // Attendance Sessions (store sectionId, ownerUid, date, status)
     match /attendanceSessions/{sessionId} {
-      allow read: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
-      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
-      allow update, delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+      allow read: if isVerifiedTeacher() && resource.data.ownerUid == request.auth.uid;
+      allow create: if isVerifiedTeacher() && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if isVerifiedTeacher() && resource.data.ownerUid == request.auth.uid;
     }
 
     // Tasks (store ownerUid)
     match /tasks/{taskId} {
-      allow read: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
-      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
-      allow update, delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+      allow read: if isVerifiedTeacher() && resource.data.ownerUid == request.auth.uid;
+      allow create: if isVerifiedTeacher() && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if isVerifiedTeacher() && resource.data.ownerUid == request.auth.uid;
     }
 
     // Task Scores (store taskId, sectionId, updatedBy)
     match /taskScores/{taskId} {
-      allow read: if isSignedIn() && resource.data.updatedBy == request.auth.uid;
-      allow create: if isSignedIn() && request.resource.data.updatedBy == request.auth.uid;
-      allow update: if isSignedIn() && resource.data.updatedBy == request.auth.uid;
-      allow delete: if isSignedIn() && resource.data.updatedBy == request.auth.uid;
+      allow read: if isVerifiedTeacher() && resource.data.updatedBy == request.auth.uid;
+      allow create: if isVerifiedTeacher() && request.resource.data.updatedBy == request.auth.uid;
+      allow update: if isVerifiedTeacher() && resource.data.updatedBy == request.auth.uid;
+      allow delete: if isVerifiedTeacher() && resource.data.updatedBy == request.auth.uid;
     }
 
     // Messages/Announcements (store ownerUid)
     match /messages/{msgId} {
-      allow read: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
-      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
-      allow update, delete: if isSignedIn() && resource.data.ownerUid == request.auth.uid;
+      allow read: if isVerifiedTeacher() && resource.data.ownerUid == request.auth.uid;
+      allow create: if isVerifiedTeacher() && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if isVerifiedTeacher() && resource.data.ownerUid == request.auth.uid;
     }
   }
 }
