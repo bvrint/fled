@@ -1,0 +1,21 @@
+{
+  "name": "fled-notify-server",
+  "version": "1.0.0",
+  "description": "FLED FCM Notification Server",
+  "main": "notify-server.js",
+  "scripts": {
+    "start": "node notify-server.js",
+    "dev": "nodemon notify-server.js"
+  },
+  "keywords": ["firebase", "fcm", "notifications"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "firebase-admin": "^11.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

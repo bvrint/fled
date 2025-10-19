@@ -67,77 +67,17 @@
                 <i class="bi bi-person-circle fs-1"></i>
               </div>
               <h3 class="text-center mb-1">Teacher Access</h3>
-              <p class="text-center text-muted mb-4 small">Log in or create a teacher account</p>
+              <p class="text-center text-muted mb-4 small">Sign in with your Google account</p>
 
-              <!-- Login Form -->
-              <form id="loginForm">
-                <div class="mb-4">
-                  <label for="email" class="form-label">Email</label>
-                  <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                    <input type="email" class="form-control" id="email" placeholder="you@example.com" required>
-                  </div>
-                </div>
-                <div class="mb-4">
-                  <label for="password" class="form-label">Password</label>
-                  <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                    <input type="password" class="form-control" id="password" placeholder="••••••••" required>
-                  </div>
-                </div>
-                <div class="d-flex justify-content-end mb-3">
-                  <a href="#" id="forgotPassword" class="small">Forgot password?</a>
-                </div>
-                <!-- keep your existing button -->
-                <button type="submit" class="login-button">
-                  <span>Login</span>
-                  <i class="bi bi-arrow-right"></i>
-                </button>
-                <p class="text-center small mt-3 mb-0">
-                  New to FLED?
-                  <a href="#" id="showSignup">Create an account</a>
-                </p>
-              </form>
+              <!-- Google Sign-In Button -->
+              <button id="googleSignInBtn" class="login-button w-100">
+                <i class="bi bi-google me-2"></i>
+                <span>Sign in with Google</span>
+              </button>
 
-              <!-- Sign Up Form (hidden by default) -->
-              <form id="signupForm" class="d-none">
-                <div class="mb-3">
-                  <label for="signupName" class="form-label">Full Name</label>
-                  <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-person"></i></span>
-                    <input type="text" class="form-control" id="signupName" placeholder="Jane Doe" required>
-                  </div>
-                </div>
-                <div class="mb-3">
-                  <label for="signupEmail" class="form-label">Email</label>
-                  <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                    <input type="email" class="form-control" id="signupEmail" placeholder="you@example.com" required>
-                  </div>
-                </div>
-                <div class="mb-3">
-                  <label for="signupPassword" class="form-label">Password</label>
-                  <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                    <input type="password" class="form-control" id="signupPassword" placeholder="Create a password" minlength="6" required>
-                  </div>
-                </div>
-                <div class="mb-4">
-                  <label for="signupConfirm" class="form-label">Confirm Password</label>
-                  <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
-                    <input type="password" class="form-control" id="signupConfirm" placeholder="Repeat your password" minlength="6" required>
-                  </div>
-                </div>
-                <button type="submit" class="login-button">
-                  <span>Create account</span>
-                  <i class="bi bi-arrow-right"></i>
-                </button>
-                <p class="text-center small mt-3 mb-0">
-                  Already have an account?
-                  <a href="#" id="showLogin">Back to login</a>
-                </p>
-              </form>
+              <p class="text-center text-muted small mt-4 mb-0">
+                Only teachers with verified Google accounts can access FLED.
+              </p>
 
               <div id="errorMessage" class="mt-3 text-danger text-center"></div>
             </div>
@@ -259,121 +199,90 @@
   <!-- Firebase SDK + (your page logic can remain as module) -->
   <script type="module">
     import { auth, db } from "./js/firebase.js";
-    import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendPasswordResetEmail, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
     import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-functions.js";
-    import { ensureContainers, showLoading, hideLoading, showAlert, flash } from "./js/ui.js";
+    import { ensureContainers, showLoading, hideLoading, showAlert } from "./js/ui.js";
+    import { registerFCMToken, setupMessageListener } from "./js/fcm-helper.js";
 
     ensureContainers();
 
-    const functions = getFunctions();
-    const promoteVerifiedTeachers = httpsCallable(functions, 'promoteVerifiedTeachers');
-
-    const loginForm = document.getElementById('loginForm');
-    const signupForm = document.getElementById('signupForm');
-    const showSignup = document.getElementById('showSignup');
-    const showLogin = document.getElementById('showLogin');
-    const forgotPassword = document.getElementById('forgotPassword');
-
-    showSignup?.addEventListener('click', (e) => { e.preventDefault(); loginForm.classList.add('d-none'); signupForm.classList.remove('d-none'); });
-    showLogin?.addEventListener('click', (e) => { e.preventDefault(); signupForm.classList.add('d-none'); loginForm.classList.remove('d-none'); });
-
-    forgotPassword?.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email')?.value?.trim();
-      if (!email) { showAlert('Enter your email above, then click again.', 'warning'); return; }
-      try { showLoading('Sending reset link…'); await sendPasswordResetEmail(auth, email); hideLoading(); showAlert('Password reset email sent.', 'success'); }
-      catch (err) { hideLoading(); showAlert(err.message, 'danger'); }
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
+    const provider = new GoogleAuthProvider();
+    
+    // Force account selection every time
+    provider.setCustomParameters({
+      prompt: 'select_account'
     });
 
-    async function fetchRoleWithRetry(uid, tries = 5, delayMs = 300) {
-      for (let i = 0; i < tries; i++) {
-        const snap = await getDoc(doc(db, 'users', uid));
-        if (snap.exists()) return snap.data()?.role || null;
-        await new Promise(r => setTimeout(r, delayMs));
-      }
-      return null;
-    }
-
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = e.submitter || loginForm.querySelector('button[type="submit"]');
-      btn && (btn.disabled = true);
+    googleSignInBtn?.addEventListener('click', async () => {
+      googleSignInBtn.disabled = true;
       try {
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value;
-        showLoading('Signing in…');
-        const { user } = await signInWithEmailAndPassword(auth, email, password);
+        showLoading('Signing in with Google…');
         
-        // Check if email is verified
-        if (!user.emailVerified) {
-          await signOut(auth);
-          hideLoading();
-          showAlert('Please verify your email before logging in. Check your inbox for the verification link.', 'warning');
-          btn && (btn.disabled = false);
-          return;
+        // Sign in with Google popup
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        
+        // Google emails are always verified
+        if (!user.email) {
+          throw new Error('No email provided by Google');
         }
         
-        // Try to promote user to teacher role if email is verified
-        try {
-          await promoteVerifiedTeachers();
-        } catch (err) {
-          console.log('Could not promote user:', err.message);
-        }
+        // Create or update user document with teacher role
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userRef);
         
-        const role = await fetchRoleWithRetry(user.uid, 5, 300);
-        if (role === 'teacher') {
-          hideLoading();
-          window.location.replace('dashboard.html');
+        if (!userSnap.exists()) {
+          // New user - create document with teacher role
+          await setDoc(userRef, {
+            uid: user.uid,
+            email: user.email,
+            name: user.displayName || '',
+            photoURL: user.photoURL || '',
+            role: 'teacher',
+            verified: true,
+            createdAt: serverTimestamp()
+          });
         } else {
-          hideLoading();
-          showAlert('Access denied. Your account is pending approval. Please try again later.', 'warning');
-          await signOut(auth);
+          // Existing user - ensure they have teacher role
+          const userData = userSnap.data();
+          if (userData.role !== 'teacher') {
+            await setDoc(userRef, {
+              role: 'teacher',
+              verified: true
+            }, { merge: true });
+          }
         }
+        
+        // Register FCM token for push notifications (don't block login if it fails)
+        registerFCMToken().catch(err => {
+          console.warn('FCM registration failed (non-critical):', err);
+        });
+        
+        // Setup foreground message listener
+        setupMessageListener();
+        
+        hideLoading();
+        showAlert('Welcome to FLED!', 'success');
+        
+        // Redirect to dashboard
+        setTimeout(() => {
+          window.location.replace('dashboard.html');
+        }, 500);
+        
       } catch (err) {
         hideLoading();
-        showAlert(err.message, 'danger');
-      } finally {
-        btn && (btn.disabled = false);
-      }
-    });
-
-    signupForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = e.submitter || signupForm.querySelector('button[type="submit"]');
-      btn && (btn.disabled = true);
-      const name = document.getElementById('signupName').value.trim();
-      const email = document.getElementById('signupEmail').value.trim();
-      const password = document.getElementById('signupPassword').value;
-      const confirm = document.getElementById('signupConfirm').value;
-      if (password !== confirm) { showAlert('Passwords do not match.', 'warning'); btn && (btn.disabled = false); return; }
-      try {
-        showLoading('Creating your account…');
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        if (name) await updateProfile(cred.user, { displayName: name });
+        googleSignInBtn.disabled = false;
         
-        // Send email verification
-        await sendEmailVerification(cred.user);
+        if (err.code === 'auth/popup-closed-by-user') {
+          showAlert('Sign-in cancelled', 'warning');
+        } else if (err.code === 'auth/popup-blocked') {
+          showAlert('Pop-up blocked. Please allow pop-ups for this site.', 'warning');
+        } else {
+          showAlert(err.message || 'Failed to sign in', 'danger');
+        }
         
-        // Set role as 'pending' until email is verified
-        await setDoc(doc(db, 'users', cred.user.uid), { 
-          uid: cred.user.uid, 
-          email, 
-          name, 
-          role: 'pending', 
-          verified: false, 
-          createdAt: serverTimestamp() 
-        }, { merge: true });
-        
-        try { await signOut(auth); } catch {}
-        hideLoading();
-        flash('Verification email sent! Please check your inbox and verify your email before logging in.', 'success', { kind: 'registered' });
-        window.location.replace('login.html');
-      } catch (err) {
-        hideLoading();
-        showAlert(err.message, 'danger');
-      } finally {
-        btn && (btn.disabled = false);
+        console.error('Google sign-in error:', err);
       }
     });
   </script>
