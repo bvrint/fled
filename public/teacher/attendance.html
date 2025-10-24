@@ -7,7 +7,8 @@
   <title>FLED - Attendance</title>
 
   <!-- Favicons -->
-  <link href="../assets/img/favicon.png" rel="icon">
+  <link href="../assets/img/favicon.svg" rel="icon" type="image/svg+xml">
+  <link href="../assets/img/favicon.png" rel="alternate icon">
   <link href="../assets/img/apple-touch-icon.png" rel="apple-touch-icon">
 
   <!-- Fonts -->
@@ -22,6 +23,9 @@
 
   <!-- Main CSS File -->
   <link href="../assets/css/main.css" rel="stylesheet">
+
+  <!-- SheetJS library for Excel export -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
   <style>
     /* Modern Attendance Styling */
@@ -515,9 +519,21 @@
 
         <!-- Attendance Logs -->
         <div class="card">
-          <div class="card-header">
-            <h5><i class="bi bi-journal-text"></i> Attendance Logs</h5>
-            <small class="text-muted">Past attendance sessions for this class</small>
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="mb-0"><i class="bi bi-journal-text"></i> Attendance Logs</h5>
+              <small class="text-muted">Past attendance sessions for this class</small>
+            </div>
+            <div class="d-flex gap-2">
+              <!-- Month Filter -->
+              <select id="monthFilter" class="form-select form-select-sm" style="width: auto;">
+                <option value="all">All Months</option>
+              </select>
+              <!-- Export to Excel Button -->
+              <button class="btn btn-success btn-sm" id="exportExcelBtn" data-bs-toggle="modal" data-bs-target="#exportModal">
+                <i class="bi bi-file-earmark-excel"></i> Export to Excel
+              </button>
+            </div>
           </div>
           <div class="card-body">
             <div id="attendanceLogsContainer">
@@ -532,6 +548,38 @@
     </section>
 
   </main>
+
+  <!-- Export to Excel Modal -->
+  <div class="modal fade" id="exportModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-file-earmark-excel"></i> Export Attendance to Excel</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted">Select the date range for your attendance export</p>
+          <div class="mb-3">
+            <label for="exportStartDate" class="form-label">Start Date</label>
+            <input type="date" class="form-control" id="exportStartDate" required>
+          </div>
+          <div class="mb-3">
+            <label for="exportEndDate" class="form-label">End Date</label>
+            <input type="date" class="form-control" id="exportEndDate" required>
+          </div>
+          <div class="alert alert-info small">
+            <i class="bi bi-info-circle"></i> Excel format: First column = Student Name, remaining columns = Dates with attendance status
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success" id="confirmExportBtn">
+            <i class="bi bi-download"></i> Download Excel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Vendor JS Files -->
   <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -1186,6 +1234,8 @@
     }
 
     // Load attendance logs
+    let allLogs = []; // Store all logs globally for filtering
+    
     async function loadAttendanceLogs() {
       try {
         const q = query(
@@ -1195,18 +1245,22 @@
         );
         const querySnapshot = await getDocs(q);
         
-        const logs = [];
+        allLogs = [];
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           if (data.status === 'finalized') {
-            logs.push({ id: doc.id, ...data });
+            allLogs.push({ id: doc.id, ...data });
           }
         });
 
         // Sort by date descending
-        logs.sort((a, b) => new Date(b.date) - new Date(a.date));
+        allLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        // Populate month filter dropdown
+        populateMonthFilter(allLogs);
 
-        displayAttendanceLogs(logs);
+        // Display logs (initially all)
+        displayAttendanceLogs(allLogs);
       } catch (err) {
         console.error('Error loading logs:', err);
         console.error('Error details:', {
@@ -1218,6 +1272,58 @@
         showAlert(`Error loading attendance logs: ${err.message}`, 'danger');
       }
     }
+
+    // Populate month filter dropdown
+    function populateMonthFilter(logs) {
+      const monthFilter = document.getElementById('monthFilter');
+      if (!monthFilter) return;
+      
+      // Get unique months from logs
+      const months = new Set();
+      logs.forEach(log => {
+        const date = new Date(log.date);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        months.add(monthKey);
+      });
+      
+      // Sort months descending
+      const sortedMonths = Array.from(months).sort().reverse();
+      
+      // Clear existing options except "All Months"
+      monthFilter.innerHTML = '<option value="all">All Months</option>';
+      
+      // Add month options
+      sortedMonths.forEach(monthKey => {
+        const [year, month] = monthKey.split('-');
+        const date = new Date(year, parseInt(month) - 1);
+        const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        const option = document.createElement('option');
+        option.value = monthKey;
+        option.textContent = monthName;
+        monthFilter.appendChild(option);
+      });
+    }
+
+    // Month filter change handler
+    document.addEventListener('DOMContentLoaded', function() {
+      const monthFilter = document.getElementById('monthFilter');
+      if (monthFilter) {
+        monthFilter.addEventListener('change', function() {
+          const selectedMonth = this.value;
+          if (selectedMonth === 'all') {
+            displayAttendanceLogs(allLogs);
+          } else {
+            const [year, month] = selectedMonth.split('-');
+            const filteredLogs = allLogs.filter(log => {
+              const logDate = new Date(log.date);
+              const logMonth = `${logDate.getFullYear()}-${String(logDate.getMonth() + 1).padStart(2, '0')}`;
+              return logMonth === selectedMonth;
+            });
+            displayAttendanceLogs(filteredLogs);
+          }
+        });
+      }
+    });
 
     // Display attendance logs
     function displayAttendanceLogs(logs) {
@@ -1348,9 +1454,125 @@
       }
     };
 
+    // Export attendance to Excel
+    async function exportToExcel(startDate, endDate) {
+      try {
+        showLoading('Preparing Excel export...');
+        
+        // Filter logs by date range
+        const filtered = allLogs.filter(log => {
+          const logDate = new Date(log.date);
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+          return logDate >= start && logDate <= end;
+        });
+
+        if (filtered.length === 0) {
+          showAlert('No attendance records found in the selected date range', 'warning');
+          return;
+        }
+
+        // Sort logs by date ascending for Excel
+        filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        // Get all unique students across all sessions
+        const studentMap = new Map();
+        filtered.forEach(log => {
+          const attendance = log.studentAttendance || {};
+          Object.values(attendance).forEach(record => {
+            if (!studentMap.has(record.studentId)) {
+              studentMap.set(record.studentId, record.studentName);
+            }
+          });
+        });
+
+        // Build Excel data
+        const excelData = [];
+        
+        // Header row: Student Name, then dates
+        const headerRow = ['Student Name'];
+        filtered.forEach(log => {
+          headerRow.push(new Date(log.date).toLocaleDateString());
+        });
+        excelData.push(headerRow);
+
+        // Data rows: each student
+        studentMap.forEach((studentName, studentId) => {
+          const row = [studentName];
+          filtered.forEach(log => {
+            const attendance = log.studentAttendance || {};
+            const record = Object.values(attendance).find(r => r.studentId === studentId);
+            const status = record ? record.finalStatus.charAt(0).toUpperCase() + record.finalStatus.slice(1) : '-';
+            row.push(status);
+          });
+          excelData.push(row);
+        });
+
+        // Create workbook and worksheet
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(excelData);
+
+        // Set column widths
+        const colWidths = [{ wch: 25 }]; // Student name column
+        filtered.forEach(() => colWidths.push({ wch: 12 })); // Date columns
+        ws['!cols'] = colWidths;
+
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
+
+        // Generate filename
+        const sectionName = currentSection ? currentSection.name.replace(/[^a-zA-Z0-9]/g, '_') : 'Section';
+        const filename = `Attendance_${sectionName}_${startDate}_to_${endDate}.xlsx`;
+
+        // Download file
+        XLSX.writeFile(wb, filename);
+
+        showAlert('Excel file downloaded successfully!', 'success');
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('exportModal'));
+        if (modal) modal.hide();
+
+      } catch (err) {
+        console.error('Error exporting to Excel:', err);
+        showAlert(`Error exporting: ${err.message}`, 'danger');
+      } finally {
+        hideLoading();
+      }
+    }
+
     // Event listeners
     document.getElementById('startAttendanceBtn').addEventListener('click', startAttendanceSession);
     document.getElementById('finalizeAttendanceBtn').addEventListener('click', finalizeAttendanceSession);
+
+    // Export modal handlers
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set default date range (current month)
+      const today = new Date();
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      
+      document.getElementById('exportStartDate').value = firstDay.toISOString().split('T')[0];
+      document.getElementById('exportEndDate').value = lastDay.toISOString().split('T')[0];
+
+      // Confirm export button
+      document.getElementById('confirmExportBtn').addEventListener('click', function() {
+        const startDate = document.getElementById('exportStartDate').value;
+        const endDate = document.getElementById('exportEndDate').value;
+        
+        if (!startDate || !endDate) {
+          showAlert('Please select both start and end dates', 'warning');
+          return;
+        }
+        
+        if (new Date(startDate) > new Date(endDate)) {
+          showAlert('Start date must be before or equal to end date', 'warning');
+          return;
+        }
+        
+        exportToExcel(startDate, endDate);
+      });
+    });
 
     // Initialize secure authentication
     initializeAuthGuard({

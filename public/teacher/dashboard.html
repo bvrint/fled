@@ -7,7 +7,8 @@
   <title>FLED - Teacher Dashboard</title>
 
   <!-- Favicons -->
-  <link href="../assets/img/favicon.png" rel="icon">
+  <link href="../assets/img/favicon.svg" rel="icon" type="image/svg+xml">
+  <link href="../assets/img/favicon.png" rel="alternate icon">
   <link href="../assets/img/apple-touch-icon.png" rel="apple-touch-icon">
 
   <!-- Fonts -->
@@ -378,6 +379,10 @@
 
       <nav id="navmenu" class="navmenu">
         <ul>
+          <li class="d-flex align-items-center gap-2">
+            <img id="teacherPhoto" src="" alt="Profile" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover; display: none;">
+            <span id="teacherName" style="font-weight: 500; color: #444;"></span>
+          </li>
           <li><a href="#" id="logout">Logout</a></li>
         </ul>
         <!-- Mobile nav toggler (required for responsive menu) -->
@@ -983,6 +988,23 @@
       timeout: 5000,
       onAuthSuccess: async (user, userData) => {
         showLoading('Loading dashboard...');
+        
+        // Display teacher profile info in header
+        const teacherNameEl = document.getElementById('teacherName');
+        const teacherPhotoEl = document.getElementById('teacherPhoto');
+        
+        if (teacherNameEl && userData.name) {
+          teacherNameEl.textContent = userData.name;
+        } else if (teacherNameEl && user.displayName) {
+          teacherNameEl.textContent = user.displayName;
+        } else if (teacherNameEl && user.email) {
+          teacherNameEl.textContent = user.email.split('@')[0];
+        }
+        
+        if (teacherPhotoEl && (userData.photoURL || user.photoURL)) {
+          teacherPhotoEl.src = userData.photoURL || user.photoURL;
+          teacherPhotoEl.style.display = 'block';
+        }
         
         // Register FCM for push notifications (non-blocking)
         registerMessaging(user).catch(err => {

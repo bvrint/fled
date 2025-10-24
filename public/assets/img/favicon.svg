@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#71c55d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5ba649;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Graduation Cap -->
+  <path fill="url(#grad)" d="M32 12L4 24l8 4v12c0 4 8.954 8 20 8s20-4 20-8V28l4-2v16h4V22L32 12z"/>
+  <path fill="url(#grad)" opacity="0.8" d="M32 40c-8.837 0-16-2.686-16-6v-8l16 8 16-8v8c0 3.314-7.163 6-16 6z"/>
+  <!-- Tassel -->
+  <circle fill="#5ba649" cx="52" cy="20" r="3"/>
+  <line stroke="#5ba649" stroke-width="2" x1="52" y1="20" x2="44" y2="20"/>
+</svg>

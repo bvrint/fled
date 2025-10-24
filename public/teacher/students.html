@@ -7,8 +7,27 @@
   <title>FLED - Student Management</title>
 
   <!-- Favicons -->
-  <link href="../assets/img/favicon.png" rel="icon">
-  <link href="../      currentUserUid = user.uid;
+  <link href="../assets/img/favicon.svg" rel="icon" type="image/svg+xml">
+  <link href="../assets/img/favicon.png" rel="alternate icon">
+  <link href="../assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="../assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="../assets/vendor/aos/aos.css" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="../assets/css/main.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <header id="header" class="header d-flex align-items-center sticky-top">
       
       // Register FCM in background (non-blocking)
       registerMessaging(user).catch(err => {
@@ -168,7 +187,7 @@
   <script type="module">
     import { auth, db } from "./js/firebase.js";
     import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-    import { collection, query, where, getDocs, addDoc, doc, updateDoc, deleteDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { collection, query, where, getDocs, addDoc, doc, updateDoc, deleteDoc, getDoc, setDoc, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
   import { showLoading, hideLoading, showAlert, confirmModal } from "./js/ui.js";
     import { registerMessaging } from "./js/fcm.js";
 
@@ -264,6 +283,22 @@
       }
     }
 
+    // Normalize email -> base64url id (UTF-8 safe)
+    function normalizeEmailToId(email) {
+      const s = (email || '').trim().toLowerCase();
+      // Use TextEncoder to handle UTF-8 properly
+      const enc = new TextEncoder().encode(s);
+      let binary = '';
+      const chunkSize = 0x8000;
+      for (let i = 0; i < enc.length; i += chunkSize) {
+        binary += String.fromCharCode.apply(null, Array.from(enc.slice(i, i + chunkSize)));
+      }
+      let b64 = btoa(binary);
+      // base64url: replace +/ and remove padding
+      b64 = b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      return b64;
+    }
+
     async function loadStudents(sectionId) {
       showLoading('Loading students…');
       try {
@@ -314,38 +349,43 @@
           return;
         }
 
-        // Create/find parent
-        const parentQuery = query(
-          collection(db, 'parents'),
-          where('email', '==', parentEmail),
-          where('ownerUid', '==', currentUserUid)
-        );
-        const parentSnapshot = await getDocs(parentQuery);
-        let parentId;
-        if (parentSnapshot.empty) {
-          const parentDoc = await addDoc(collection(db, 'parents'), {
-            name: 'Parent of ' + name,
-            email: parentEmail,
-            phone: parentPhone,
-            linkedStudentIds: [],
-            ownerUid: auth.currentUser.uid
-          });
-          parentId = parentDoc.id;
-        } else {
-          parentId = parentSnapshot.docs[0].id;
+        // Upsert parent using normalized email id to avoid duplicates
+        const normalizedId = normalizeEmailToId(parentEmail);
+        const parentRef = doc(db, 'parents', normalizedId);
+        const parentSnap = await getDoc(parentRef);
+        // If a parent record exists, prompt the teacher to confirm linking instead of creating duplicate
+        if (parentSnap.exists()) {
+          const parentData = parentSnap.data() || {};
+          const foundName = parentData.name || parentEmail;
+          const wantLink = await confirmModal('Parent already exists', `A parent with this email already exists. Do you want to link student ${name} to ${foundName}?`, { confirmText: 'Link student', cancelText: 'Cancel', variant: 'primary' });
+          if (!wantLink) {
+            showAlert('Linking cancelled.', 'info');
+            return;
+          }
         }
 
-        await addDoc(collection(db, 'students'), {
+        // First create the student document to get its Firestore doc ID
+        const studentDocRef = await addDoc(collection(db, 'students'), {
           name,
           studentId,
           grade,
           sectionId: currentSectionId,
-          parentId,
+          parentId: normalizedId, // set parent ID immediately
           parentPhone,
           parentEmail,
           ownerUid: auth.currentUser.uid,
           createdAt: serverTimestamp()
         });
+
+        // Now upsert parent and link to the student Firestore doc ID (not the studentId number)
+        await setDoc(parentRef, {
+          email: parentEmail.trim().toLowerCase(),
+          name: parentSnap.exists() ? (parentSnap.data().name || ('Parent of ' + name)) : ('Parent of ' + name),
+          phone: parentPhone || null,
+          linkedStudentIds: arrayUnion(studentDocRef.id),
+          ownerUids: arrayUnion(auth.currentUser.uid),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
 
         // Update section students list (summary)
         const sectionRef = doc(db, 'sections', currentSectionId);
@@ -384,6 +424,31 @@
     // Ensure DOM is ready before attempting UI updates
     document.addEventListener('DOMContentLoaded', function() {
       console.log('DOM ready, section loading can proceed');
+      // Parent email blur: quick check for existing parent and prompt linking
+      const parentEmailEl = document.getElementById('parentEmail');
+      if (parentEmailEl) {
+        let blurTimer = null;
+        parentEmailEl.addEventListener('blur', async (ev) => {
+          const email = (ev.target.value || '').trim();
+          if (!email) return;
+          try {
+            const id = normalizeEmailToId(email);
+            const pRef = doc(db, 'parents', id);
+            const snap = await getDoc(pRef);
+            if (snap.exists()) {
+              const data = snap.data() || {};
+              const foundName = data.name || email;
+              const ok = await confirmModal('Parent already exists', `A parent with this email already exists. Do you want to link this student to ${foundName}?`, { confirmText: 'Link student', cancelText: 'Cancel', variant: 'primary' });
+              if (!ok) {
+                // leave email in place but allow teacher to change
+                showAlert('Linking cancelled. You may edit the email to create a new parent.', 'info');
+              }
+            }
+          } catch (err) {
+            console.warn('Parent existence check failed:', err);
+          }
+        });
+      }
     });
     
     onAuthStateChanged(auth, async (user) => {

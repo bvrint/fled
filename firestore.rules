@@ -33,11 +33,27 @@ service cloud.firestore {
       allow update, delete: if isTeacher() && resource.data.ownerUid == request.auth.uid;
     }
 
-    // Parents created by the teacher as contacts (store ownerUid)
+    // Parents stored under parents/{normalizedId}
+    // Teachers may create/update parent contact records and manage linkedStudentIds and ownerUids
+    // Parents may read their own document (authenticated by email) and update limited fields
     match /parents/{parentId} {
-      allow read: if isTeacher() && resource.data.ownerUid == request.auth.uid;
-      allow create: if isTeacher() && request.resource.data.ownerUid == request.auth.uid;
-      allow update, delete: if isTeacher() && resource.data.ownerUid == request.auth.uid;
+      // Allow teachers to read any parent doc (they need to query/manage all their parents)
+      allow read: if isTeacher();
+      
+      // Allow teachers to create/update parent docs (they manage parent contacts)
+      allow create, update: if isTeacher();
+      
+      // Allow teachers to delete parent docs
+      allow delete: if isTeacher();
+      
+      // Parents can read their own doc by matching email in their ID token
+      allow read: if isSignedIn() && request.auth.token.email == resource.data.email;
+
+      // Allow parent (the person) to update only specific fields
+      allow update: if isSignedIn()
+        && request.auth.token.email == resource.data.email
+        && request.resource.data.email == resource.data.email
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['linkedStudentIds', 'ownerUids']);
     }
 
     // Attendance (store sectionId, studentId, ownerUid)
@@ -61,12 +77,24 @@ service cloud.firestore {
       allow update, delete: if isTeacher() && resource.data.ownerUid == request.auth.uid;
     }
 
-    // Task Scores (store taskId, sectionId, updatedBy)
-    match /taskScores/{taskId} {
-      allow read: if isTeacher() && resource.data.updatedBy == request.auth.uid;
-      allow create: if isTeacher() && request.resource.data.updatedBy == request.auth.uid;
-      allow update: if isTeacher() && resource.data.updatedBy == request.auth.uid;
-      allow delete: if isTeacher() && resource.data.updatedBy == request.auth.uid;
+    // Task Scores (store taskId, sectionId, studentId, ownerUid or updatedBy)
+    match /taskScores/{scoreId} {
+      allow read: if isTeacher() && (
+        resource.data.ownerUid == request.auth.uid || 
+        resource.data.updatedBy == request.auth.uid
+      );
+      allow create: if isTeacher() && (
+        request.resource.data.ownerUid == request.auth.uid || 
+        request.resource.data.updatedBy == request.auth.uid
+      );
+      allow update: if isTeacher() && (
+        resource.data.ownerUid == request.auth.uid || 
+        resource.data.updatedBy == request.auth.uid
+      );
+      allow delete: if isTeacher() && (
+        resource.data.ownerUid == request.auth.uid || 
+        resource.data.updatedBy == request.auth.uid
+      );
     }
 
     // Messages/Announcements (store ownerUid)

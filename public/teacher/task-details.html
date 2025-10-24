@@ -7,7 +7,8 @@
   <title>FLED - Task Details</title>
 
   <!-- Favicons -->
-  <link href="../assets/img/favicon.png" rel="icon">
+  <link href="../assets/img/favicon.svg" rel="icon" type="image/svg+xml">
+  <link href="../assets/img/favicon.png" rel="alternate icon">
   <link href="../assets/img/apple-touch-icon.png" rel="apple-touch-icon">
 
   <!-- Fonts -->
@@ -889,7 +890,8 @@
           perfectScore: taskData.perfectScore || 100,
           scores: currentScores,
           updatedAt: serverTimestamp(),
-          updatedBy: currentUserUid
+          updatedBy: currentUserUid,
+          ownerUid: currentUserUid
         };
         
         // Save to taskScores collection

@@ -1,6 +1,19 @@
 // Messaging logic
 import { auth, db } from './firebase.js';
-import { collection, query, where, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+import { collection, query, where, getDocs, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+function normalizeEmailToId(email) {
+  const s = (email || '').trim().toLowerCase();
+  const enc = new TextEncoder().encode(s);
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < enc.length; i += chunkSize) {
+    binary += String.fromCharCode.apply(null, Array.from(enc.slice(i, i + chunkSize)));
+  }
+  let b64 = btoa(binary);
+  b64 = b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return b64;
+}
 
 export async function sendAnnouncement(content, sectionId) {
   const user = auth.currentUser;
@@ -15,10 +28,10 @@ export async function sendAnnouncement(content, sectionId) {
 
 export async function sendPrivateMessage(content, parentEmail) {
   const user = auth.currentUser;
-  const parentQuery = query(collection(db, 'parents'), where('email', '==', parentEmail));
-  const parentSnapshot = await getDocs(parentQuery);
-  if (!parentSnapshot.empty) {
-    const parentId = parentSnapshot.docs[0].id;
+  const parentId = normalizeEmailToId(parentEmail);
+  const parentRef = doc(db, 'parents', parentId);
+  const parentSnapshot = await getDoc(parentRef);
+  if (parentSnapshot.exists()) {
     await addDoc(collection(db, 'messages'), {
       fromTeacherId: user.uid,
       toParentId: parentId,
