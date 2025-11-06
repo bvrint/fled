@@ -1423,3 +1423,98 @@ button[disabled]{opacity:.7;cursor:not-allowed}
 
 /* Optional: smooth hide */
 .alert.fade-out{transition:opacity .4s ease, transform .4s ease;opacity:0;transform:translateY(-6px)}
+
+/*--------------------------------------------------------------
+# Download App Section
+--------------------------------------------------------------*/
+.download.section {
+  background: linear-gradient(135deg, #71c55d 0%, #5ba349 100%);
+  color: #ffffff;
+  padding: 80px 0;
+}
+
+.download.section h2 {
+  color: #ffffff;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.download.section .lead {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.download.section p {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1.1rem;
+}
+
+.download.section .btn {
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.download.section .btn-primary {
+  background: #ffffff;
+  color: #71c55d;
+  border: 2px solid #ffffff;
+}
+
+.download.section .btn-primary:hover {
+  background: transparent;
+  color: #ffffff;
+  border-color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.download.section .btn-dark {
+  background: #212529;
+  color: #ffffff;
+  border: 2px solid #212529;
+}
+
+.download.section .btn-dark:hover {
+  background: #ffffff;
+  color: #212529;
+  border-color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.download.section .text-muted {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.download.section .text-muted a {
+  color: #ffffff;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.download.section .text-muted a:hover {
+  color: #f0f0f0;
+}
+
+@media (max-width: 768px) {
+  .download.section h2 {
+    font-size: 2rem;
+  }
+  
+  .download.section .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .download.section .d-flex {
+    flex-direction: column !important;
+  }
+}
