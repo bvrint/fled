@@ -28,7 +28,8 @@ service cloud.firestore {
 
     // Students under a section (store sectionId and ownerUid on student docs)
     match /students/{studentId} {
-      allow read: if isTeacher() && resource.data.ownerUid == request.auth.uid;
+      allow read: if (isTeacher() && resource.data.ownerUid == request.auth.uid) ||
+                     (isSignedIn() && request.auth.token.email == resource.data.parentEmail);
       allow create: if isTeacher() && request.resource.data.ownerUid == request.auth.uid;
       allow update, delete: if isTeacher() && resource.data.ownerUid == request.auth.uid;
     }
